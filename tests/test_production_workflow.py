@@ -16,7 +16,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 class ProductionWorkflowTests(unittest.TestCase):
     def test_init_creates_a_complete_production_dossier(self):
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary) / "productions"
+            root = Path(temporary) / "producties"
 
             result = main(
                 [
@@ -28,7 +28,7 @@ class ProductionWorkflowTests(unittest.TestCase):
             )
 
             self.assertEqual(result, 0)
-            directory = root / "2627-cinderella"
+            directory = root / "2627" / "cinderella"
             for name in ("input", "answers", "output", "archive"):
                 self.assertTrue((directory / name).is_dir())
             manifest = json.loads(
@@ -40,9 +40,9 @@ class ProductionWorkflowTests(unittest.TestCase):
 
     def test_generate_writes_all_concept_outputs_and_updates_status(self):
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary) / "productions"
+            root = Path(temporary) / "producties"
             main(["init", "9999-test", "--root", str(root)])
-            directory = root / "9999-test"
+            directory = root / "9999" / "test"
             pdf = directory / "input" / "planning.pdf"
             pdf.write_bytes(b"%PDF placeholder for mocked extraction")
             schedule = parse_page_texts(
@@ -106,9 +106,9 @@ class ProductionWorkflowTests(unittest.TestCase):
 
     def test_generate_creates_answer_template_for_open_questions(self):
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary) / "productions"
+            root = Path(temporary) / "producties"
             main(["init", "9998-opera", "--root", str(root)])
-            directory = root / "9998-opera"
+            directory = root / "9998" / "opera"
             pdf = directory / "input" / "planning.pdf"
             pdf.write_bytes(b"%PDF placeholder for mocked extraction")
             schedule = parse_page_texts(

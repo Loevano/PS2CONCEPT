@@ -70,6 +70,14 @@
   },
   "exclusion_rules": [
     {
+      "id": "geen-avm-operastudios-of-concertgebouw",
+      "description": "AVM is niet aanwezig bij activiteiten in de Operastudio's of in Het Concertgebouw.",
+      "location_patterns": [
+        "^Operastudio(?:\\s+\\d+)?$",
+        "^Het Concertgebouw$"
+      ]
+    },
+    {
       "id": "technische-tijd",
       "description": "Technische tijd wordt niet in het AVM-rooster opgenomen.",
       "activity_patterns": [
@@ -191,13 +199,17 @@
     },
     {
       "id": "dno-voorbereiden-belichten",
-      "description": "Bij DNO is opbouwen/voorbereiden voor belichten een gebruikelijk voorbereidingsmoment voor AVM1; AVM2 wordt toegevoegd als decorinbouw is bevestigd.",
+      "description": "Bij DNO is opbouwen/voorbereiden voor belichten alleen op de eerste bijbehorende dag op het Hoofdtoneel een gebruikelijk voorbereidingsmoment voor AVM1; AVM2 wordt toegevoegd als decorinbouw is bevestigd.",
       "production_patterns": [
         "^DNO\\b"
       ],
       "activity_patterns": [
         "^(?:opbouwen|voorbereiden|opbouwen/voorbereiden).*\\bbelichten\\b"
       ],
+      "location_patterns": [
+        "^Hoofdtoneel$"
+      ],
+      "only_first_matching_day": true,
       "required_count": 1,
       "preferred_position": "AVM1",
       "planning_level": "gebruikelijk"
@@ -221,15 +233,14 @@
     },
     {
       "id": "dno-regierepetitie",
-      "description": "Een DNO-regierepetitie wordt door AVM1 gedaan, met aanwezigheid vanaf minimaal één uur voor aanvang.",
+      "description": "Een DNO-regierepetitie vereist AVM1 en AVM2, met aanwezigheid vanaf minimaal één uur voor aanvang.",
       "production_patterns": [
         "^DNO\\b"
       ],
       "activity_patterns": [
         "^regie\\s*repetitie(?:\\s+.*)?$"
       ],
-      "required_count": 1,
-      "preferred_position": "AVM1",
+      "required_count": 2,
       "manual_check": "De regierepetitie omvat PNO en zang; als er zenders zijn, ook zendertechnici controleren."
     },
     {
@@ -261,7 +272,7 @@
       "id": "voorgenerale",
       "description": "Een voorgenerale vereist twee AVM'ers.",
       "activity_patterns": [
-        "^voorgenerale(?:\\s+.*)?$"
+        "^(?:piano\\s+)?voorgenerale(?:\\s+.*)?$"
       ],
       "required_count": 2
     },
@@ -335,6 +346,32 @@
   "location_staffing_rules": [],
   "call_time_rules": [
     {
+      "id": "voorstelling-twee-gewerkte-uren-vooraf",
+      "description": "Voor een voorstelling is AVM minimaal twee gewerkte uren voor aanvang aanwezig; lunch- en dinerpauzes tellen niet mee.",
+      "activity_patterns": [
+        "^voorstelling(?:\\s+\\d+)?$",
+        "^schoolvoorstelling$"
+      ],
+      "working_minutes_before": 120,
+      "excluded_break_minutes": {
+        "lunchpauze": 30,
+        "dinerpauze": 60
+      }
+    },
+    {
+      "id": "otr-vgo-pvg-twee-gewerkte-uren-vooraf",
+      "description": "Voor OTR, VGO en PVG is AVM minimaal twee gewerkte uren voor aanvang aanwezig; lunch- en dinerpauzes tellen niet mee.",
+      "activity_patterns": [
+        "^orkest\\s*toneelrepetitie(?:\\s+.*)?$",
+        "^(?:piano\\s+)?voorgenerale(?:\\s+.*)?$"
+      ],
+      "working_minutes_before": 120,
+      "excluded_break_minutes": {
+        "lunchpauze": 30,
+        "dinerpauze": 60
+      }
+    },
+    {
       "id": "belichten-halfuur-vooraf",
       "description": "Voor belichten is één AVM'er minimaal 30 minuten voor aanvang aanwezig.",
       "activity_patterns": [
@@ -344,7 +381,7 @@
     },
     {
       "id": "dno-regierepetitie-uur-vooraf",
-      "description": "Voor een DNO-regierepetitie is AVM1 minimaal één uur voor aanvang aanwezig.",
+      "description": "Voor een DNO-regierepetitie zijn AVM1 en AVM2 minimaal één uur voor aanvang aanwezig.",
       "production_patterns": [
         "^DNO\\b"
       ],
@@ -357,7 +394,7 @@
   "call_time_adjustments": [
     {
       "id": "geen-dienststart-om-1200",
-      "description": "Een AVM-dienst die om 12:00 zou beginnen, begint normaal om 11:30 zodat de pauzeregel toepasbaar blijft. Deze correctie vervalt als de dienst daardoor de harde CAO-grens van 12 uur overschrijdt.",
+      "description": "Een AVM-dienst die om 12:00 zou beginnen, begint normaal om 11:30 zodat de pauzeregel toepasbaar blijft. Deze correctie vervalt als de dienst daardoor de maximale werkdag van 13,5 uur overschrijdt.",
       "from": "12:00",
       "to": "11:30"
     }
@@ -389,13 +426,22 @@
     ],
     "activity_buffer_rules": [
       {
-        "id": "voorgenerale-vaste-aanwezigheid-en-afbouw",
-        "description": "Bij een voorgenerale blijft de berekende begintijd 4,5 uur voor aanvang staan. De afbouwtijd is 30 minuten bij overstaan en 60 minuten bij niet overstaan.",
+        "id": "orkesttoneelrepetitie-twee-uur-vooraf",
+        "description": "Bij een orkesttoneelrepetitie is AVM minimaal twee gewerkte uren voor aanvang aanwezig; pauzes tellen niet mee.",
         "activity_patterns": [
-          "^voorgenerale(?:\\s+.*)?$"
+          "^orkest\\s*toneelrepetitie(?:\\s+.*)?$"
         ],
-        "before_minutes": 270,
-        "after_minutes": 60
+        "before_minutes": 120
+      },
+      {
+        "id": "voorgenerale-twee-uur-voorbereiding-en-afbouw",
+        "description": "Bij een VGO of PVG begint de AVM-dienst minimaal twee gewerkte uren voor aanvang; pauzes tellen niet mee. De afbouwtijd is 30 minuten bij overstaan en 60 minuten bij niet overstaan; de dienst wordt niet kunstmatig tot acht uur verlengd.",
+        "activity_patterns": [
+          "^(?:piano\\s+)?voorgenerale(?:\\s+.*)?$"
+        ],
+        "before_minutes": 120,
+        "after_minutes": 60,
+        "preserve_required_window": true
       },
       {
         "id": "belichten-halfuur-voor-en-na",
@@ -407,11 +453,12 @@
         "after_minutes": 30
       },
       {
-        "id": "solistenrepetitie-halfuur-na",
-        "description": "Na een solistenrepetitie hoeft AVM nog 30 minuten te blijven.",
+        "id": "solistenrepetitie-halfuur-voor-en-na",
+        "description": "Bij een solistenrepetitie is AVM 30 minuten voor aanvang aanwezig en blijft AVM 30 minuten na afloop.",
         "activity_patterns": [
           "^solistenrepetitie(?:\\s+.*)?$"
         ],
+        "before_minutes": 30,
         "after_minutes": 30
       },
       {
@@ -426,20 +473,42 @@
     "special_shift_rules": [
       {
         "id": "schoolvoorstelling-om-1330",
-        "description": "Een schoolvoorstelling met aanvang 13:30 begint om 10:00: drie gewerkte uren vooraf plus een lunchpauze van 30 minuten.",
+        "description": "Een schoolvoorstelling begint minimaal twee gewerkte uren voor aanvang; lunch- en dinerpauzes tellen niet mee.",
         "activity_patterns": [
           "^schoolvoorstelling$"
         ],
         "activity_start": "13:30",
-        "start": "10:00",
-        "end": "18:00"
+        "use_avm_call_time": true,
+        "end": "18:00",
+        "preserve_required_window": true
       },
       {
-        "id": "voorstelling-of-generale-om-1400",
-        "description": "Een voorstelling of generale met aanvang 14:00 wordt geroosterd van 10:00 tot 18:00.",
+        "id": "voorstelling-om-1400",
+        "description": "Een voorstelling met aanvang 14:00 begint minimaal twee gewerkte uren vooraf, exclusief pauzes, en eindigt om 18:00.",
         "activity_patterns": [
           "^voorstelling(?:\\s+\\d+)?$",
-          "^schoolvoorstelling$",
+          "^schoolvoorstelling$"
+        ],
+        "activity_start": "14:00",
+        "use_avm_call_time": true,
+        "end": "18:00",
+        "preserve_required_window": true
+      },
+      {
+        "id": "voorstelling-relatief-aan-aanvang",
+        "description": "Een voorstelling begint minimaal twee gewerkte uren voor aanvang, exclusief pauzes, en eindigt vier uur na aanvang.",
+        "activity_patterns": [
+          "^voorstelling(?:\\s+\\d+)?$",
+          "^schoolvoorstelling$"
+        ],
+        "use_avm_call_time": true,
+        "end_offset_minutes": 240,
+        "preserve_required_window": true
+      },
+      {
+        "id": "generale-om-1400",
+        "description": "Een generale met aanvang 14:00 wordt geroosterd van 10:00 tot 18:00.",
+        "activity_patterns": [
           "^generale(?:\\s+repetitie)?$"
         ],
         "activity_start": "14:00",
@@ -447,11 +516,9 @@
         "end": "18:00"
       },
       {
-        "id": "voorstelling-of-generale-relatief-aan-aanvang",
-        "description": "Een voorstelling of generale wordt relatief aan de aanvang geroosterd: 4,5 uur ervoor tot 4 uur erna (19:30 wordt 15:00-23:30).",
+        "id": "generale-relatief-aan-aanvang",
+        "description": "Een generale wordt relatief aan de aanvang geroosterd: 4,5 uur ervoor tot 4 uur erna (19:30 wordt 15:00-23:30).",
         "activity_patterns": [
-          "^voorstelling(?:\\s+\\d+)?$",
-          "^schoolvoorstelling$",
           "^generale(?:\\s+repetitie)?$"
         ],
         "start_offset_minutes": -270,
@@ -459,7 +526,7 @@
       }
     ],
     "double_performance_rule": {
-      "description": "Op een dag met twee voorstellingen draaien AVM1 en AVM2 beide voorstellingen. Als de normale aanwezigheid langer dan 12 uur zou duren, wordt de voorbereiding vóór de eerste voorstelling ingekort en worden de laatste 12 uur van de dag geroosterd.",
+      "description": "Op een dag met twee voorstellingen draaien AVM1 en AVM2 beide voorstellingen. Als de normale aanwezigheid langer dan 13,5 uur zou duren, wordt de voorbereiding vóór de eerste voorstelling ingekort en worden de laatste 13,5 uur van de dag geroosterd.",
       "activity_patterns": [
         "^voorstelling(?:\\s+\\d+)?$",
         "^schoolvoorstelling$"
@@ -467,7 +534,7 @@
       "minimum_count": 2,
       "cap_at_maximum_shift": true
     },
-    "maximum_shift_minutes": 720,
+    "maximum_shift_minutes": 810,
     "minimum_rest_minutes": 660
   },
   "overflow_policy": {
@@ -570,7 +637,7 @@
         "priority": 20
       }
     ],
-    "description": "Een langere dienst bij AVM1 of AVM2 heeft voorrang op TEAM-AVM zolang de dienst maximaal 12 uur duurt en minimaal 11 uur rust behouden blijft. Alleen als anders een CAO-conflict ontstaat, wordt dekking volgens vervangingsprioriteit naar TEAM-AVM verplaatst. Een verplichte activiteit blijft gedekt; de persoonsvoorkeur is ondergeschikt aan de CAO. Bij iedere voorstelling blijft waar mogelijk minimaal één primaire AVM-positie aanwezig."
+    "description": "Een langere dienst bij AVM1 of AVM2 heeft voorrang op TEAM-AVM zolang de werkdag maximaal 13,5 uur duurt, inclusief maximaal 30 minuten lunchpauze en 60 minuten dinerpauze, en minimaal 11 uur rust behouden blijft. Alleen als anders een CAO-conflict ontstaat, wordt dekking volgens vervangingsprioriteit naar TEAM-AVM verplaatst. Een verplichte activiteit blijft gedekt; de persoonsvoorkeur is ondergeschikt aan de CAO. Bij iedere voorstelling blijft waar mogelijk minimaal één primaire AVM-positie aanwezig."
   },
   "required_text": [
     "AVM"

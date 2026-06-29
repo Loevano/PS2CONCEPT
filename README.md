@@ -17,12 +17,14 @@ Maak bijvoorbeeld een dossier voor Cinderella:
 Hiermee ontstaat:
 
 ```text
-productions/2627-cinderella/
-├── production.json
-├── input/
-├── answers/
-├── output/
-└── archive/
+producties/
+└── 2627/
+    └── cinderella/
+        ├── production.json
+        ├── input/
+        ├── answers/
+        ├── output/
+        └── archive/
 ```
 
 Plaats de geleverde planning als `input/planning.pdf`. Een andere PDF-naam werkt
@@ -30,7 +32,7 @@ ook zolang er precies één PDF in `input/` staat. Genereer daarna het
 conceptrooster:
 
 ```bash
-.venv/bin/auto-planner generate productions/2627-cinderella
+.venv/bin/auto-planner generate producties/2627/cinderella
 ```
 
 Voor dagelijks gebruik is ook een kort shellcommando beschikbaar. Dit gebruikt
@@ -102,6 +104,10 @@ Een andere PDF kan later zonder codewijziging:
 
 - Activiteiten, datums, tijden, locaties en toelichtingen worden uit het
   productieschema gelezen.
+- Zowel de Nederlandse als de Engelse NO&B-PDF-structuur wordt herkend.
+  Engelstalige metadata, weekdagen, maanden, locaties en vaste
+  activiteitstermen worden bij extractie naar dezelfde interne begrippen
+  genormaliseerd als de Nederlandstalige planning.
 - Eindtijden na middernacht krijgen automatisch de volgende kalenderdatum.
 - De reguliere AVM-roosterperiode begint op de dag van de eerste activiteit op
   het Hoofdtoneel. Proefbouw, OT, de opera-presentatie van cast en huis, de
@@ -116,9 +122,12 @@ Een andere PDF kan later zonder codewijziging:
   OR-, orkesttoneel-, pianotoneel- en generale repetities expliciete
   uitzonderingen. In de Grote Studio is bij deze repetities geen AVM nodig;
   de grote studiorepetitie van DNO blijft een afzonderlijke uitzondering.
-- Bij DNO is opbouwen/voorbereiden voor belichten een voorbereidingsdag voor
-  AVM1 en heeft dit het planniveau `gebruikelijk`. Alleen wanneer decorinbouw
-  is bevestigd, worden AVM1 en AVM2 geroosterd.
+- Activiteiten in de Operastudio's en in Het Concertgebouw worden niet voor
+  AVM geroosterd, ongeacht het activiteitstype.
+- Bij DNO is opbouwen/voorbereiden voor belichten alleen op de eerste
+  bijbehorende dag op het Hoofdtoneel een voorbereidingsmoment voor AVM1 met
+  planniveau `gebruikelijk`. Alleen wanneer decorinbouw is bevestigd, worden
+  AVM1 en AVM2 geroosterd.
 - Bij een DNO-productie vraagt de planner of er iets in het decor moet worden
   ingebouwd. Bij `ja` moet een Montagehalmoment bestaan of via een
   antwoordenbestand van datum en tijd worden voorzien. Zonder antwoord blijft
@@ -126,17 +135,21 @@ Een andere PDF kan later zonder codewijziging:
 - Licht richten en technische tijd worden niet geroosterd. Oplevering van het
   decor is een richtlijn: inplannen zolang dit zonder CAO-conflict kan.
 - Belichten vereist precies één AVM'er, aanwezig vanaf minimaal 30 minuten voor
-  aanvang. Een DNO-regierepetitie staat bij AVM1 vanaf minimaal één uur vooraf.
+  aanvang. Een DNO-regierepetitie vereist AVM1 en AVM2, beiden vanaf minimaal
+  één uur vooraf.
 - Piano CD vereist AVM1 en AVM2, maar is bij conflictoplossing een vroege
   kandidaat voor TEAM-AVM-overname.
 - De huidige bedrijfsregels vereisen twee AVM'ers bij iedere voorstelling
   (inclusief schoolvoorstelling), alle generales en orkest-gerelateerde
   repetities zoals orkestrepetitie, orkesttoneelrepetitie en voorgenerale orkest.
+- Bij OTR, VGO en PVG zijn de AVM'ers minimaal twee gewerkte uren voor aanvang
+  aanwezig; lunch- en dinerpauzes tellen niet mee.
 - HNB-pianotoneelrepetities staan bij voorkeur met twee AVM'ers, maar kunnen
   bij CAO-druk per situatie naar TEAM-AVM worden verplaatst.
-- Bij een voorgenerale blijft de vereiste begintijd leidend: 4,5 uur voor
-  aanvang. Bij overstaan wordt 30 minuten afbouwtijd ingepland; bij niet
-  overstaan 60 minuten.
+- Bij een VGO of PVG begint de AVM-dienst minimaal twee gewerkte uren voor
+  aanvang, exclusief pauzes. Bij
+  overstaan wordt 30 minuten afbouwtijd ingepland; bij niet overstaan 60
+  minuten. Deze dienst wordt niet kunstmatig tot acht uur verlengd.
 - Technische repetities vereisen minimaal één AVM'er met voorkeur voor AVM 1.
 - HNB-cd-toneelrepetities en belichten vereisen één AVM'er en mogen door een
   TEAM-AVM worden gedaan.
@@ -147,25 +160,25 @@ Een andere PDF kan later zonder codewijziging:
   HNB-pianotoneelrepetities. Als dat niet genoeg is, mogen ook andere verplichte
   AVM-activiteiten naar TEAM-AVM om dienstduur en rusttijd op te lossen.
 - Een langere dienst voor AVM1 of AVM2 heeft altijd voorrang op TEAM-AVM zolang
-  de dienst maximaal twaalf uur duurt en minimaal elf uur rust behouden blijft.
+  de werkdag maximaal 13,5 uur duurt (inclusief 30 minuten lunchpauze en 60
+  minuten dinerpauze) en minimaal elf uur rust behouden blijft.
 - Verplichte activiteiten blijven gedekt. Een voorkeur voor AVM1/AVM2 mag bij
   CAO-druk door TEAM-AVM worden overgenomen; activiteitprioriteit en
   persoonsvoorkeur zijn afzonderlijke beslissingen.
 - Orkestrepetities en solistenrepetities vereisen twee AVM'ers: AVM 1 en AVM 2.
-- Bij voorstellingen, schoolvoorstellingen en generale repetities geldt een
-  aanwezigheidstijd van drie gewerkte uren vóór aanvang. Lunchpauze (30
+- Bij voorstellingen en schoolvoorstellingen geldt een minimale
+  aanwezigheidstijd van twee gewerkte uren vóór aanvang. Lunchpauze (30
   minuten) en dinerpauze (60 minuten) tellen daarbij niet mee. De planner kan
   eerder beginnen om de streefduur van acht uur te halen.
-- Een schoolvoorstelling om 13:30 begint daarom om 10:00: drie gewerkte uren
-  plus een lunchpauze van 30 minuten.
+- Een schoolvoorstelling om 13:30 met een lunchpauze in de aanlooptijd begint
+  daarom om 11:00.
 - Op dagen met twee voorstellingen draaien AVM1 en AVM2 beide voorstellingen.
-  Als de normale aanwezigheid langer dan twaalf uur zou duren, wordt de
+  Als de normale aanwezigheid langer dan 13,5 uur zou duren, wordt de
   voorbereiding vóór de eerste voorstelling ingekort en worden de laatste
-  twaalf uur van de dag geroosterd. Bij een einde om 00:00 wordt dit dus
-  12:00-00:00.
+  13,5 uur van de dag geroosterd.
 - Een berekende AVM-dienststart van exact 12:00 wordt normaal naar 11:30
-  vervroegd. Deze correctie vervalt wanneer de dienst daardoor langer dan de
-  harde CAO-grens van twaalf uur wordt. De activiteitstijd uit de bron-PDF
+  vervroegd. Deze correctie vervalt wanneer de werkdag daardoor langer dan
+  13,5 uur wordt. De activiteitstijd uit de bron-PDF
   blijft ongewijzigd.
 - AVM-diensttijden worden naar buiten afgerond op halve uren: de start naar
   beneden en het einde naar boven. De andere grens wordt niet verschoven om
@@ -228,18 +241,21 @@ werkzaamheidscodes gebruikt.
 
 Een standaarddag is 09:00-17:00. Gewone activiteiten moeten vanaf één uur voor
 aanvang tot één uur na afloop worden afgedekt; als nodig verschuift het
-achtuursblok. Bij belichten hoeft AVM pas 30 minuten voor aanvang aanwezig te
-zijn en 30 minuten na afloop te blijven. Na een solistenrepetitie of
-pianotoneelrepetitie hoeft AVM nog 30 minuten te blijven. Voorstellingen,
-schoolvoorstellingen en generale repetities gebruiken
-een relatief venster van 4,5 uur vóór tot 4 uur na de aanvang:
-19:30 wordt 15:00-23:30 en 20:00 wordt 15:30-00:00.
-Een voorstelling of generale met aanvang 14:00 vormt een uitzondering en wordt
-10:00-18:00 geroosterd.
+achtuursblok. Bij OTR, VGO en PVG begint de vereiste aanwezigheid minimaal
+twee gewerkte uren voor aanvang; pauzes tellen niet mee. Bij belichten hoeft AVM pas 30 minuten voor aanvang
+aanwezig te zijn en 30 minuten na afloop te blijven. Bij een solistenrepetitie
+is AVM eveneens 30 minuten voor aanvang aanwezig en blijft AVM 30 minuten na
+afloop. Na een pianotoneelrepetitie hoeft AVM nog 30 minuten te blijven.
+Voorstellingen en schoolvoorstellingen beginnen minimaal twee gewerkte uren voor
+aanvang; een aanwezige lunchpauze van 30 minuten en dinerpauze van 60 minuten
+worden vóór die aanlooptijd toegevoegd. De dienst eindigt vier uur na aanvang.
+Generale repetities behouden het relatieve venster van 4,5 uur vóór tot 4 uur
+na aanvang. Een generale met aanvang 14:00 wordt 10:00-18:00 geroosterd.
 Het tekstrooster vermeldt afwijkingen van de streefduur niet in de opmerkingen.
-Diensten die korter uitkomen, worden aan het einde tot de achturige streefduur
-aangevuld; de toegevoegde tijd staat wel als opmerking vermeld.
-Diensten boven twaalf uur en minder dan elf uur rust worden automatisch
+Diensten die korter uitkomen, beginnen eerder om de achturige streefduur te
+halen; de toegevoegde tijd staat als opmerking vermeld. Deze aanvulling wordt
+ingekort als anders minder dan elf uur nachtrust overblijft.
+Diensten boven 13,5 uur en minder dan elf uur rust worden automatisch
 opgelost door activiteiten naar TEAM-AVM-diensten te verplaatsen; als dat niet
 lukt, blijft een CAO-conflict zichtbaar en krijgt het gehele rooster de status
 `ongeldig_cao`.

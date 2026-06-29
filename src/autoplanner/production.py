@@ -31,6 +31,23 @@ def _production_title(name: str) -> str:
     return value.replace("-", " ").strip().title()
 
 
+def _production_path(name: str) -> tuple[str, str]:
+    year, separator, production_name = name.partition("-")
+    if (
+        not separator
+        or not year
+        or not production_name
+        or Path(year).name != year
+        or Path(production_name).name != production_name
+        or year in {".", ".."}
+        or production_name in {".", ".."}
+    ):
+        raise ValueError(
+            "Gebruik jaar-productienaam, bijvoorbeeld 2627-cinderella."
+        )
+    return year, production_name
+
+
 def _write_json(path: Path, value: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as handle:
@@ -40,13 +57,12 @@ def _write_json(path: Path, value: dict[str, Any]) -> None:
 
 def initialise_production(
     name: str,
-    root: str | Path = "productions",
+    root: str | Path = "producties",
     title: str | None = None,
 ) -> Path:
-    if not name or Path(name).name != name or name in {".", ".."}:
-        raise ValueError("Gebruik één mapnaam, bijvoorbeeld 2627-cinderella.")
+    year, production_name = _production_path(name)
 
-    production_dir = Path(root).expanduser().resolve() / name
+    production_dir = Path(root).expanduser().resolve() / year / production_name
     manifest_path = production_dir / MANIFEST_NAME
     if manifest_path.exists():
         raise FileExistsError(f"Productie bestaat al: {production_dir}")

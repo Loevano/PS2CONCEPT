@@ -61,12 +61,12 @@ def build_parser() -> argparse.ArgumentParser:
         "init", help="Maak een nieuw productiedossier"
     )
     initialise.add_argument(
-        "name", help="Mapnaam, bijvoorbeeld 2627-cinderella"
+        "name", help="Jaar en productienaam, bijvoorbeeld 2627-cinderella"
     )
     initialise.add_argument(
         "--root",
         type=Path,
-        default=Path("productions"),
+        default=Path("producties"),
         help="Bovenliggende productiemap",
     )
     initialise.add_argument("--title", help="Leesbare productietitel")

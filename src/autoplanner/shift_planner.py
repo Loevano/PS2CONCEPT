@@ -7,6 +7,16 @@ import re
 from .models import PlanningItem, ProductionSchedule
 
 
+TEAM_REASON_PREFIX = "TEAM-OVERNAME-REDEN: "
+
+
+def _minutes_as_prose(minutes: int) -> str:
+    hours, remainder = divmod(minutes, 60)
+    if remainder == 0:
+        return f"{hours} uur"
+    return f"{hours} uur {remainder} min"
+
+
 @dataclass
 class DailyShift:
     position: str
@@ -73,6 +83,20 @@ def _activity_buffer_minutes(
     return before, after, preserve_after
 
 
+def _preserve_required_window(
+    items: list[PlanningItem], shift_rules: dict
+) -> bool:
+    for item in items:
+        for rule_group in ("activity_buffer_rules", "special_shift_rules"):
+            for rule in shift_rules.get(rule_group, []):
+                if not rule.get("preserve_required_window"):
+                    continue
+                patterns = [str(pattern) for pattern in rule.get("activity_patterns", [])]
+                if patterns and _matches_patterns(item.activity, patterns):
+                    return True
+    return False
+
+
 def _required_window(
     items: list[PlanningItem], shift_rules: dict
 ) -> tuple[datetime, datetime, tuple[datetime, datetime] | None]:
@@ -92,7 +116,17 @@ def _required_window(
                 rule["activity_start"]
             ):
                 continue
-            if "start_offset_minutes" in rule and "end_offset_minutes" in rule:
+            if rule.get("use_avm_call_time") and item.avm_call_time is not None:
+                candidate = (
+                    item.avm_call_time,
+                    (
+                        _at(item.day, str(rule["end"]))
+                        if "end" in rule
+                        else item.start
+                        + timedelta(minutes=int(rule["end_offset_minutes"]))
+                    ),
+                )
+            elif "start_offset_minutes" in rule and "end_offset_minutes" in rule:
                 candidate = (
                     item.start + timedelta(minutes=int(rule["start_offset_minutes"])),
                     item.start + timedelta(minutes=int(rule["end_offset_minutes"])),
@@ -116,7 +150,9 @@ def _required_window(
         windows.append(
             special_window
             or (
-                item.start - timedelta(minutes=before),
+                item.avm_call_time
+                if item.avm_call_time is not None
+                else item.start - timedelta(minutes=before),
                 item_end + timedelta(minutes=after),
             )
         )
@@ -162,6 +198,10 @@ def _planned_bounds(
             rounded_end,
             target_minutes,
         )
+
+    if _preserve_required_window(items, shift_rules):
+        start, end = _round_shift_bounds(required_start, required_end, shift_rules)
+        return start, end, target_minutes
 
     if base_start <= required_start and required_end <= base_end:
         start, end = _round_shift_bounds(base_start, base_end, shift_rules)
@@ -214,6 +254,20 @@ def _team_replacement_flag(shift: DailyShift, overflow: dict) -> str | None:
     if not activity_names:
         return None
     return f"{label} OVERNAME NODIG VOOR: {', '.join(activity_names)}"
+
+
+def _team_replacement_reason(position: str, shift: DailyShift) -> str:
+    conflicts = [
+        flag.removeprefix("CAO-CONFLICT: ").strip()
+        for flag in shift.flags
+        if flag.startswith("CAO-CONFLICT: ")
+    ]
+    if conflicts:
+        return f"TEAM-overname van {position}: {'; '.join(conflicts)}"
+    return (
+        f"TEAM-overname van {position}: nodig om een vastgesteld conflict "
+        "met dagduur of nachtrust op te lossen"
+    )
 
 
 def _items_on_day(items: list[PlanningItem], day: date) -> list[PlanningItem]:
@@ -545,6 +599,15 @@ def _plan_daily_shifts_for_items(
             items=day_items,
             target_minutes=target_minutes,
         )
+        team_reasons = []
+        for item in day_items:
+            for reason in item.avm_reasons:
+                if not reason.startswith(TEAM_REASON_PREFIX):
+                    continue
+                note = reason.removeprefix(TEAM_REASON_PREFIX)
+                if note not in team_reasons:
+                    team_reasons.append(note)
+        shift.flags.extend(team_reasons)
         shift.flags.extend(f"Startcorrectie: {reason}" for reason in adjustment_reasons)
         if skipped_adjustment_reasons:
             shift.flags = [
@@ -560,19 +623,30 @@ def _plan_daily_shifts_for_items(
         if double_performance_capped:
             shift.flags.append(
                 "Voorbereiding vóór de eerste voorstelling ingekort zodat "
-                "AVM1 en AVM2 beide voorstellingen binnen de 12-uursgrens draaien"
+                "AVM1 en AVM2 beide voorstellingen binnen de grens van "
+                f"{_minutes_as_prose(maximum_minutes)} draaien"
             )
         shifts.append(shift)
 
-    def fill_to_target(shift: DailyShift) -> None:
+    def fill_to_target(
+        shift: DailyShift, earliest_start: datetime | None = None
+    ) -> None:
         if shift.duration_minutes >= shift.target_minutes:
             return
-        added = shift.target_minutes - shift.duration_minutes
-        shift.end += timedelta(minutes=added)
+        desired_start = shift.end - timedelta(minutes=shift.target_minutes)
+        new_start = (
+            max(desired_start, earliest_start)
+            if earliest_start is not None
+            else desired_start
+        )
+        added = int((shift.start - new_start).total_seconds() // 60)
+        if added <= 0:
+            return
+        shift.start = new_start
         shift.target_fill_minutes += added
 
-    for shift in shifts:
-        fill_to_target(shift)
+    if shifts:
+        fill_to_target(shifts[0])
 
     for previous, current in zip(shifts, shifts[1:]):
         rest_minutes = int((current.start - previous.end).total_seconds() // 60)
@@ -593,21 +667,31 @@ def _plan_daily_shifts_for_items(
                     f"CAO-CONFLICT: {rest_minutes // 60}u{rest_minutes % 60:02d} "
                     "rust sinds vorige dienst; minimaal 11 uur vereist"
                 )
-        fill_to_target(current)
+        fill_to_target(
+            current,
+            earliest_start=previous.end + timedelta(minutes=minimum_rest_minutes),
+        )
 
     for shift in shifts:
         if shift.target_fill_minutes:
             target_label = (
                 f"{shift.target_minutes // 60}u{shift.target_minutes % 60:02d}"
             )
-            shift.flags.append(
-                f"Dienst aangevuld met {shift.target_fill_minutes} min "
-                f"tot streefduur van {target_label}"
-            )
+            if shift.duration_minutes >= shift.target_minutes:
+                shift.flags.append(
+                    f"Dienst begint {shift.target_fill_minutes} min eerder "
+                    f"om streefduur van {target_label} te halen"
+                )
+            else:
+                shift.flags.append(
+                    f"Dienst begint {shift.target_fill_minutes} min eerder; "
+                    f"streefduur van {target_label} niet haalbaar door minimale nachtrust"
+                )
         if shift.duration_minutes > maximum_minutes:
             shift.flags.append(
                 f"CAO-CONFLICT: dienst duurt {shift.duration_minutes // 60}u"
-                f"{shift.duration_minutes % 60:02d} en overschrijdt 12 uur"
+                f"{shift.duration_minutes % 60:02d} en overschrijdt "
+                f"{_minutes_as_prose(maximum_minutes)}"
             )
         overflow = rules.get("overflow_policy", {})
         if (
@@ -731,20 +815,28 @@ def build_cao_resolved_assignments(
                 if not scored_candidates:
                     continue
                 *_, item_to_move = min(scored_candidates)
-                selected_move = (position, item_to_move)
+                selected_move = (
+                    position,
+                    item_to_move,
+                    _team_replacement_reason(position, shift),
+                )
                 break
             if selected_move:
                 break
         if not selected_move:
             break
 
-        position, item_to_move = selected_move
+        position, item_to_move, replacement_reason = selected_move
         assignments[position] = _items_without_instance(
             assignments[position], item_to_move
         )
         team_item = replace(
             item_to_move,
             id=f"{item_to_move.id}#team-overname-{position}",
+            avm_reasons=[
+                *item_to_move.avm_reasons,
+                TEAM_REASON_PREFIX + replacement_reason,
+            ],
         )
         _assign_team_item(team_assignments, team_item, rules)
 

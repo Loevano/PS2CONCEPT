@@ -49,11 +49,29 @@ def _matches_rule_context(schedule: ProductionSchedule, item, rule: dict) -> boo
         ("exclude_production_patterns", schedule.title or ""),
         ("exclude_search_patterns", " ".join([item.activity, *item.details])),
     )
-    return not any(
+    if any(
         patterns and _matches_activity(value, patterns)
         for key, value in exclusions
         if (patterns := [str(pattern) for pattern in rule.get(key, [])])
-    )
+    ):
+        return False
+
+    if rule.get("only_first_matching_day"):
+        base_rule = {
+            key: value
+            for key, value in rule.items()
+            if key != "only_first_matching_day"
+        }
+        first_day = min(
+            (
+                candidate.day
+                for candidate in schedule.items
+                if _matches_rule_context(schedule, candidate, base_rule)
+            ),
+            default=None,
+        )
+        return item.day == first_day
+    return True
 
 
 def _first_scope_start(schedule: ProductionSchedule, scope: dict) -> datetime | None:

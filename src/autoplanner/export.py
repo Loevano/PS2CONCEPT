@@ -43,16 +43,20 @@ DUTCH_MONTHS = [
 ACTIVITY_LEGEND_LINES = [
     "  BEL = Belichten           CD  = Cd-toneelrepetitie",
     "  GEN = Generale            OR  = Orkestrepetitie",
-    "  OT  = Orkesttoneelrep.    PTR = Pianotoneelrepetitie",
+    "  OTR = Orkesttoneelrep.    PTR = Pianotoneelrepetitie",
+    "  PB  = Proefbouw           PRES = Presentatie cast & huis",
     "  PVG = Pianovoorgenerale   SR  = Solistenrepetitie",
+    "  RR  = Regierepetitie",
     "  SV  = Schoolvoorstelling  TR  = Technische repetitie",
-    "  VGO = Voorgenerale orkest  VST = Voorstelling",
+    "  V   = Voorstelling        VGO = Voorgenerale orkest",
 ]
 COMPACT_ACTIVITY_LEGEND_LINES = [
     "  BEL = Belichten           CD  = Cd-toneelrepetitie",
     "  GEN = Generale            OR  = Orkestrepetitie",
     "  OTR = Orkesttoneelrep.    PTR = Pianotoneelrepetitie",
+    "  PB  = Proefbouw           PRES = Presentatie cast & huis",
     "  PVG = Pianovoorgenerale   SR  = Solistenrepetitie",
+    "  RR  = Regierepetitie",
     "  SV  = Schoolvoorstelling  TR  = Technische repetitie",
     "  VGO = Voorgenerale orkest  V1/V2/... = Voorstelling",
 ]
@@ -68,6 +72,9 @@ EVENT_ORDER = {
     "SR": 7,
     "CD": 8,
     "BEL": 9,
+    "PB": 10,
+    "PRES": 11,
+    "RR": 12,
 }
 
 
@@ -233,7 +240,7 @@ def _activity_time(item) -> str:
 
 def _activity_label(activity: str) -> str:
     if re.search(r"^orkest\s*toneelrepetitie", activity, flags=re.IGNORECASE):
-        return "OT — Orkest toneel repetitie"
+        return "OTR — Orkest toneel repetitie"
     if re.search(r"^voorgenerale\s+orkest", activity, flags=re.IGNORECASE):
         return "VGO — Voor Generale Orkest"
     if re.search(r"^piano\s+voorgenerale", activity, flags=re.IGNORECASE):
@@ -251,7 +258,7 @@ def _short_production_name(title: str | None) -> str:
 
 def _schedule_activity_code(activity: str) -> str:
     mappings = [
-        (r"^orkest\s*toneelrepetitie", "OT"),
+        (r"^orkest\s*toneelrepetitie", "OTR"),
         (r"^voorgenerale\s+orkest", "VGO"),
         (r"^piano\s+voorgenerale", "PVG"),
         (r"^piano\s+toneelrepetitie", "PTR"),
@@ -261,13 +268,19 @@ def _schedule_activity_code(activity: str) -> str:
         (r"^solistenrepetitie", "SR"),
         (r"^generale(?:\s+repetitie)?$", "GEN"),
         (r"^schoolvoorstelling$", "SV"),
+        (r"^proefbouw(?:\s+.*)?$", "PB"),
+        (
+            r"^(?:presentatie\s+)?cast\s*(?:&|en)\s*huis(?:\s+presentatie)?$",
+            "PRES",
+        ),
+        (r"^regie\s*repetitie(?:\s+.*)?$", "RR"),
     ]
     for pattern, code in mappings:
         if re.search(pattern, activity, flags=re.IGNORECASE):
             return code
     performance = re.search(r"^voorstelling(?:\s+(\d+))?$", activity, re.IGNORECASE)
     if performance:
-        return f"VST {performance.group(1)}" if performance.group(1) else "VST"
+        return f"V {performance.group(1)}" if performance.group(1) else "V"
     if re.search(r"\bbelichten\b", activity, flags=re.IGNORECASE):
         return "BEL"
     return activity
@@ -283,8 +296,7 @@ def _compact_activity_code(activity: str) -> str:
     if performance:
         number = performance.group(1)
         return f"V{number}" if number else "V"
-    code = _event_activity_code(activity)
-    return "OTR" if code == "OT" else code
+    return _event_activity_code(activity)
 
 
 def _is_performance_code(code: str) -> bool:
@@ -619,15 +631,14 @@ def render_avm_events_text(schedule: ProductionSchedule) -> str:
     ]
     _append_table(
         lines,
-        ["Datum", "Tijd", "Locatie", "Productie", "Code", "Activiteit", "Bezetting"],
+        ["Datum", "Tijd", "Locatie", "Activiteit", "Code", "Bezetting"],
         [
             [
                 f"{DUTCH_DAYS_SHORT[item.day.weekday()]} {item.day:%d-%m-%Y}",
                 _activity_time(item),
                 item.location or "locatie NTB",
-                production_name,
-                _event_activity_code(item.activity),
                 item.activity,
+                _event_activity_code(item.activity),
                 _staffing_text(item),
             ]
             for item in sorted(required, key=lambda value: (value.day, value.start))
@@ -670,15 +681,14 @@ def render_avm_events_text(schedule: ProductionSchedule) -> str:
     )
     _append_table(
         lines,
-        ["Datum", "Tijd", "Locatie", "Productie", "Code", "Activiteit", "Dekking"],
+        ["Datum", "Tijd", "Locatie", "Activiteit", "Code", "Dekking"],
         [
             [
                 f"{DUTCH_DAYS_SHORT[item.day.weekday()]} {item.day:%d-%m-%Y}",
                 _activity_time(item),
                 item.location or "locatie NTB",
-                production_name,
-                _event_activity_code(item.activity),
                 item.activity,
+                _event_activity_code(item.activity),
                 _staffing_text(item),
             ]
             for item in sorted(optional, key=lambda value: (value.day, value.start))
@@ -693,15 +703,14 @@ def render_avm_events_text(schedule: ProductionSchedule) -> str:
     )
     _append_table(
         lines,
-        ["Datum", "Tijd", "Locatie", "Productie", "Code", "Activiteit", "Reden"],
+        ["Datum", "Tijd", "Locatie", "Activiteit", "Code", "Reden"],
         [
             [
                 f"{DUTCH_DAYS_SHORT[item.day.weekday()]} {item.day:%d-%m-%Y}",
                 _activity_time(item),
                 item.location or "locatie NTB",
-                production_name,
-                _event_activity_code(item.activity),
                 item.activity,
+                _event_activity_code(item.activity),
                 "; ".join(item.avm_reasons) or "AVM-relatie controleren",
             ]
             for item in sorted(review, key=lambda value: (value.day, value.start))
@@ -764,15 +773,14 @@ def render_avm_events_text(schedule: ProductionSchedule) -> str:
     )
     _append_table(
         lines,
-        ["Datum", "Tijd", "Locatie", "Productie", "Code", "Activiteit", "Reden"],
+        ["Datum", "Tijd", "Locatie", "Activiteit", "Code", "Reden"],
         [
             [
                 f"{DUTCH_DAYS_SHORT[item.day.weekday()]} {item.day:%d-%m-%Y}",
                 _activity_time(item),
                 item.location or "locatie NTB",
-                production_name,
-                _event_activity_code(item.activity),
                 _activity_with_details(item),
+                _event_activity_code(item.activity),
                 "; ".join(item.avm_reasons) or "Geen AVM-regel van toepassing",
             ]
             for item in sorted(not_needed, key=lambda value: (value.day, value.start))
