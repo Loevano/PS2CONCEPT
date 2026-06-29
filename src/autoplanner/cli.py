@@ -21,6 +21,7 @@ from .production import (
     load_manifest,
     output_paths,
     resolve_answers_path,
+    resolve_production_reference,
     resolve_source_pdf,
     update_manifest,
     write_answers_template,
@@ -71,10 +72,32 @@ def build_parser() -> argparse.ArgumentParser:
     )
     initialise.add_argument("--title", help="Leesbare productietitel")
 
+    add = subparsers.add_parser(
+        "add", help="Maak alle mappen voor een nieuwe productie"
+    )
+    add.add_argument("year", help="Seizoen, bijvoorbeeld 2627")
+    add.add_argument("name", help="Productienaam, bijvoorbeeld cinderella")
+    add.add_argument(
+        "--root",
+        type=Path,
+        default=Path("producties"),
+        help="Bovenliggende productiemap",
+    )
+    add.add_argument("--title", help="Leesbare productietitel")
+
     generate = subparsers.add_parser(
         "generate", help="Genereer alle conceptuitvoer van een productiedossier"
     )
-    generate.add_argument("production", type=Path, help="Pad naar productiedossier")
+    generate.add_argument(
+        "production",
+        help="Productienaam, jaar-productienaam of pad naar productiedossier",
+    )
+    generate.add_argument(
+        "--root",
+        type=Path,
+        default=Path("producties"),
+        help="Bovenliggende productiemap",
+    )
     generate.add_argument(
         "--rules",
         type=Path,
@@ -146,9 +169,25 @@ def run_init(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_add(args: argparse.Namespace) -> int:
+    if "/" in args.year or "/" in args.name:
+        raise SystemExit("Jaar en productienaam mogen geen '/' bevatten.")
+    try:
+        production_dir = initialise_production(
+            f"{args.year}-{args.name}", args.root, args.title
+        )
+    except (ValueError, FileExistsError) as error:
+        raise SystemExit(str(error)) from error
+    print(f"Productiedossier aangemaakt: {production_dir}")
+    print(f"Plaats de planning-PDF in: {production_dir / 'input'}")
+    print(f"Genereer daarna met: ./generate {args.name}")
+    return 0
+
+
 def run_generate(args: argparse.Namespace) -> int:
     try:
-        production_dir, manifest = load_manifest(args.production)
+        reference = resolve_production_reference(args.production, args.root)
+        production_dir, manifest = load_manifest(reference)
         pdf = resolve_source_pdf(production_dir, manifest)
         answers_path = resolve_answers_path(production_dir, manifest)
     except (FileNotFoundError, ValueError, OSError) as error:
@@ -227,6 +266,8 @@ def main(argv: list[str] | None = None) -> int:
         return run_extract(args)
     if args.command == "init":
         return run_init(args)
+    if args.command == "add":
+        return run_add(args)
     if args.command == "generate":
         return run_generate(args)
     raise SystemExit(f"Onbekend commando: {args.command}")

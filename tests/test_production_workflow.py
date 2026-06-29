@@ -1,5 +1,6 @@
 import csv
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -8,12 +9,22 @@ from unittest.mock import patch
 from autoplanner.cli import main
 from autoplanner.parser import parse_page_texts
 from autoplanner.production import OUTPUT_FILES
+from autoplanner.production import resolve_production_reference, resolve_source_pdf
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class ProductionWorkflowTests(unittest.TestCase):
+    def test_add_accepts_separate_year_and_name(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "producties"
+
+            result = main(["add", "2627", "cinderella", "--root", str(root)])
+
+            self.assertEqual(result, 0)
+            self.assertTrue((root / "2627" / "cinderella" / "production.json").is_file())
+
     def test_init_creates_a_complete_production_dossier(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary) / "producties"
@@ -64,7 +75,9 @@ class ProductionWorkflowTests(unittest.TestCase):
                 result = main(
                     [
                         "generate",
-                        str(directory),
+                        "test",
+                        "--root",
+                        str(root),
                         "--rules",
                         str(PROJECT_ROOT / "config" / "avm_rules.json"),
                     ]
@@ -145,6 +158,34 @@ class ProductionWorkflowTests(unittest.TestCase):
                 (directory / "production.json").read_text(encoding="utf-8")
             )
             self.assertEqual(manifest["status"], "invoer_nodig")
+
+    def test_name_reference_finds_production_and_rejects_ambiguity(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "producties"
+            main(["add", "2627", "cinderella", "--root", str(root)])
+
+            found = resolve_production_reference("cinderella", root)
+            self.assertEqual(found, (root / "2627" / "cinderella").resolve())
+
+            main(["add", "2728", "cinderella", "--root", str(root)])
+            with self.assertRaisesRegex(ValueError, "Meerdere producties"):
+                resolve_production_reference("cinderella", root)
+
+    def test_latest_pdf_is_selected_by_default(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "producties"
+            main(["add", "2627", "cinderella", "--root", str(root)])
+            directory = root / "2627" / "cinderella"
+            old_pdf = directory / "input" / "planning-v1.pdf"
+            new_pdf = directory / "input" / "planning-v2.pdf"
+            old_pdf.write_bytes(b"old")
+            new_pdf.write_bytes(b"new")
+            os.utime(old_pdf, ns=(1_000_000_000, 1_000_000_000))
+            os.utime(new_pdf, ns=(2_000_000_000, 2_000_000_000))
+
+            selected = resolve_source_pdf(directory, {})
+
+            self.assertEqual(selected, new_pdf.resolve())
 
 
 if __name__ == "__main__":

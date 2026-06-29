@@ -1,20 +1,19 @@
 # Offline Auto Planner
 
-Deze eerste versie zet een NO&B-productieplanning uit PDF om naar controleerbare
-JSON- en CSV-bestanden. Alle verwerking gebeurt lokaal. De bron-PDF wordt niet
-gewijzigd en de applicatie schrijft bewust nog niet naar het definitieve
+Auto Planner zet een NO&B-productieplanning uit PDF om naar een
+controleerbaar conceptrooster. Alle verwerking gebeurt lokaal. De bron-PDF
+wordt niet gewijzigd en de applicatie schrijft niet naar het definitieve
 Excel-bestand.
 
-## Productiedossiers
+## Dagelijks gebruik
 
-De aanbevolen workflow gebruikt voor iedere productie een zelfstandig dossier.
-Maak bijvoorbeeld een dossier voor Cinderella:
+Maak vanuit de hoofdmap van Auto Planner eerst de productie aan:
 
 ```bash
-.venv/bin/auto-planner init 2627-cinderella
+./add 2627 cinderella
 ```
 
-Hiermee ontstaat:
+Dit maakt alle benodigde mappen:
 
 ```text
 producties/
@@ -27,26 +26,31 @@ producties/
         └── archive/
 ```
 
-Plaats de geleverde planning als `input/planning.pdf`. Een andere PDF-naam werkt
-ook zolang er precies één PDF in `input/` staat. Genereer daarna het
-conceptrooster:
+Plaats vervolgens een of meer aangeleverde plannings-PDF's in:
 
-```bash
-.venv/bin/auto-planner generate producties/2627/cinderella
+```text
+producties/2627/cinderella/input/
 ```
 
-Voor dagelijks gebruik is ook een kort shellcommando beschikbaar. Dit gebruikt
-automatisch de virtuele Python-omgeving:
+Genereer daarna alle uitvoer:
+
+```bash
+./generate cinderella
+```
+
+`generate` mag steeds opnieuw worden uitgevoerd en vervangt alle gegenereerde
+uitvoer. Als er meerdere PDF's in `input/` staan, gebruikt Auto Planner
+automatisch de PDF die het laatst is aangemaakt of gewijzigd. Oude PDF's mogen
+dus blijven staan.
+
+Als dezelfde productienaam in meerdere seizoenen bestaat, is alleen de naam
+niet eenduidig. Gebruik dan bijvoorbeeld:
 
 ```bash
 ./generate 2627-cinderella
 ```
 
-Als het productiedossier nog niet bestaat, maakt dit commando eerst automatisch
-de volledige mappenstructuur aan. Plaats daarna de PDF in de gemelde `input/`-map
-en voer hetzelfde commando opnieuw uit.
-
-De vaste uitvoer is:
+De uitvoer staat in `producties/2627/cinderella/output/`:
 
 ```text
 output/
@@ -69,35 +73,15 @@ noodzakelijke productie-invoer ontbreekt, maakt de planner
 `answers/decisions.json` aan. Vul dit bestand in en voer hetzelfde
 `generate`-commando opnieuw uit.
 
-## Uitvoer genereren
+## Eenmalige installatie
 
-De onderstaande losse generator blijft beschikbaar voor bestaande workflows.
-De Cinderella-PDF is voorlopig als standaardinput gekoppeld in
-[`generate_output.py`](generate_output.py). Alle uitvoer opnieuw genereren:
-
-```bash
-.venv/bin/python generate_output.py
-```
-
-Hiermee worden `output/cinderella.json`, `output/cinderella.csv`,
-`output/cinderella.txt`, `output/cinderella_avm_rooster.txt` en
-`output/cinderella_avm_events.txt` gemaakt. `output/cinderella.txt` bevat een
-compact dagoverzicht met datum, tijdspan, duur, eventafkortingen en de
-chronologische volgorde. `output/cinderella_avm_rooster.txt` bevat de
-personeelsroosters van AVM 1, AVM 2 en eventuele TEAM-AVM-overname diensten
-die nodig zijn om CAO-conflicten op te lossen. Het AVM-eventsbestand bevat alle
-verplichte AVM-events, kandidaten en losse bronnotities. Onderaan staat ook
-`GEEN AVM NODIG`, zonder pauzes en losse tijdmarkeringen. JSON en CSV bewaren
-de volledige bronextractie en controlepunten.
-
-Daarnaast wordt `output/roosterregels.txt` gegenereerd. Dit bestand bundelt de
-AVM-bedrijfsregels, actieve planningslogica, afkortingen en CAO-regels. Het
-maakt expliciet welke CAO-controles nog een volledig persoonlijk rooster nodig
-hebben.
-Een andere PDF kan later zonder codewijziging:
+De virtuele Python-omgeving is alleen een technische installatievoorwaarde.
+Een gebruiker maakt deze één keer aan; voor dagelijks gebruik zijn alleen
+`./add` en `./generate` nodig.
 
 ```bash
-.venv/bin/python generate_output.py --pdf "Documentation/andere planning.pdf" --name andere-planning
+python3 -m venv .venv
+.venv/bin/pip install -e .
 ```
 
 ## Huidige afbakening
@@ -207,34 +191,26 @@ De planner gebruikt vier afzonderlijke planniveaus:
 4. `optioneel`: alleen binnen bestaande capaciteit toevoegen.
 
 Een conditionele vraag activeert een regel en is dus geen numerieke prioriteit.
-Antwoorden kunnen als JSON worden meegegeven:
+Open vragen worden na de eerste generatie geschreven naar
+`answers/decisions.json`. Vul daar bijvoorbeeld in:
 
-```bash
-.venv/bin/python generate_output.py \
-  --answers config/production_answers.example.json
+```json
+{
+  "decor_inbouw_nodig": {
+    "value": "ja"
+  }
+}
 ```
 
 Bij `decor_inbouw_nodig: ja` kan het antwoord ook `day`, `start` en `end`
 bevatten. Als er nog geen passend Montagehalmoment in de bronplanning staat,
 maakt de planner daarmee een expliciet, herleidbaar moment aan.
 
-## Installeren en uitvoeren
+## Roosterberekening
 
-```bash
-python3 -m venv .venv
-.venv/bin/pip install -e .
-.venv/bin/auto-planner extract \
-  "Documentation/PSB 2627 HNB3 Cinderella v02032026.pdf" \
-  --rules config/avm_rules.json \
-  --json output/cinderella.json \
-  --csv output/cinderella.csv \
-  --text output/cinderella.txt \
-  --answers config/production_answers.example.json
-```
-
-De JSON-uitvoer is het volledige controlebestand. De CSV is bedoeld om snel te
-filteren of gegevens voorlopig handmatig naar Excel over te nemen. De
-tekstuitvoer bevat een compact dagoverzicht van de verplichte AVM-events.
+Het controlebestand bevat de volledige extractie. De CSV is bedoeld om snel te
+filteren of gegevens voorlopig handmatig naar Excel over te nemen. Het
+tekstbestand bevat een compact dagoverzicht van de verplichte AVM-events.
 Activiteiten zonder bekende aanwezigheidstijd worden niet gegokt, maar als
 `NTB` weergegeven. In het rooster worden OTR, VGO en PVG als vaste
 werkzaamheidscodes gebruikt.
@@ -260,7 +236,7 @@ opgelost door activiteiten naar TEAM-AVM-diensten te verplaatsen; als dat niet
 lukt, blijft een CAO-conflict zichtbaar en krijgt het gehele rooster de status
 `ongeldig_cao`.
 
-Tests uitvoeren:
+Ontwikkelaars kunnen alle tests uitvoeren met:
 
 ```bash
 .venv/bin/python -m unittest discover -s tests -v

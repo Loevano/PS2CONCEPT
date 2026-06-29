@@ -4,21 +4,12 @@ set -eu
 PROJECT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 if [ "$#" -ne 1 ]; then
-    echo "Gebruik: ./generate <jaar-productienaam>" >&2
-    echo "Voorbeeld: ./generate 2627-faust" >&2
-    exit 2
-fi
-
-PRODUCTION_REF=$1
-PRODUCTION_YEAR=${PRODUCTION_REF%%-*}
-PRODUCTION_NAME=${PRODUCTION_REF#*-}
-if [ "$PRODUCTION_YEAR" = "$PRODUCTION_REF" ] || [ -z "$PRODUCTION_YEAR" ] || [ -z "$PRODUCTION_NAME" ]; then
-    echo "Gebruik jaar-productienaam, bijvoorbeeld 2627-faust." >&2
+    echo "Gebruik: ./generate <productienaam>" >&2
+    echo "Voorbeeld: ./generate cinderella" >&2
     exit 2
 fi
 
 PRODUCTION_ROOT="$PROJECT_DIR/producties"
-PRODUCTION_DIR="$PRODUCTION_ROOT/$PRODUCTION_YEAR/$PRODUCTION_NAME"
 PLANNER="$PROJECT_DIR/.venv/bin/auto-planner"
 
 if [ ! -x "$PLANNER" ]; then
@@ -27,16 +18,4 @@ if [ ! -x "$PLANNER" ]; then
     exit 1
 fi
 
-if [ ! -f "$PRODUCTION_DIR/production.json" ]; then
-    echo "Productiedossier bestaat nog niet; structuur wordt aangemaakt."
-    "$PLANNER" init "$PRODUCTION_REF" --root "$PRODUCTION_ROOT"
-    echo ""
-    echo "Plaats de planning-PDF in:"
-    echo "  $PRODUCTION_DIR/input/"
-    echo ""
-    echo "Voer daarna opnieuw uit:"
-    echo "  ./generate $PRODUCTION_REF"
-    exit 0
-fi
-
-exec "$PLANNER" generate "$PRODUCTION_DIR"
+exec "$PLANNER" generate "$1" --root "$PRODUCTION_ROOT"

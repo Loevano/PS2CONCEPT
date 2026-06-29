@@ -98,6 +98,42 @@ def load_manifest(production_dir: str | Path) -> tuple[Path, dict[str, Any]]:
     return directory, manifest
 
 
+def resolve_production_reference(
+    reference: str | Path,
+    root: str | Path = "producties",
+) -> Path:
+    candidate = Path(reference).expanduser()
+    if (candidate / MANIFEST_NAME).is_file():
+        return candidate.resolve()
+
+    production_root = Path(root).expanduser().resolve()
+    value = str(reference)
+    if "-" in value and Path(value).name == value:
+        year, production_name = _production_path(value)
+        candidate = production_root / year / production_name
+        if (candidate / MANIFEST_NAME).is_file():
+            return candidate
+
+    matches: list[Path] = []
+    if Path(value).name == value and value not in {".", ".."}:
+        matches = sorted(
+            candidate
+            for year_dir in production_root.glob("*")
+            if year_dir.is_dir()
+            for candidate in [year_dir / value]
+            if (candidate / MANIFEST_NAME).is_file()
+        )
+    if not matches:
+        raise FileNotFoundError(f"Productie niet gevonden: {value}")
+    if len(matches) > 1:
+        choices = ", ".join(str(path.relative_to(production_root)) for path in matches)
+        raise ValueError(
+            f"Meerdere producties heten '{value}': {choices}. "
+            "Gebruik jaar-productienaam."
+        )
+    return matches[0].resolve()
+
+
 def _safe_dossier_path(directory: Path, relative_value: str, field: str) -> Path:
     candidate = (directory / relative_value).resolve()
     try:
@@ -108,21 +144,18 @@ def _safe_dossier_path(directory: Path, relative_value: str, field: str) -> Path
 
 
 def resolve_source_pdf(directory: Path, manifest: dict[str, Any]) -> Path:
-    configured = str(manifest.get("source") or DEFAULT_SOURCE)
-    configured_path = _safe_dossier_path(directory, configured, "source")
-    if configured_path.is_file():
-        return configured_path
+    pdfs = list((directory / "input").glob("*.pdf"))
+    if pdfs:
+        def recency(path: Path) -> tuple[int, str]:
+            stat = path.stat()
+            created_ns = int(getattr(stat, "st_birthtime", 0) * 1_000_000_000)
+            return max(created_ns, stat.st_mtime_ns), path.name
 
-    pdfs = sorted((directory / "input").glob("*.pdf"))
-    if len(pdfs) == 1:
-        return pdfs[0].resolve()
+        return max(pdfs, key=recency).resolve()
     if not pdfs:
         raise FileNotFoundError(
             f"Geen PDF gevonden. Plaats de planning in {directory / 'input'}."
         )
-    raise ValueError(
-        "Meerdere PDF-bestanden gevonden; stel 'source' in production.json in."
-    )
 
 
 def resolve_answers_path(directory: Path, manifest: dict[str, Any]) -> Path:

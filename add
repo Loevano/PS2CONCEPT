@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+
+PROJECT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PLANNER="$PROJECT_DIR/.venv/bin/auto-planner"
+
+if [ "$#" -ne 2 ]; then
+    echo "Gebruik: ./add <jaar> <productienaam>" >&2
+    echo "Voorbeeld: ./add 2627 cinderella" >&2
+    exit 2
+fi
+
+if [ ! -x "$PLANNER" ]; then
+    echo "Auto Planner is nog niet geïnstalleerd. Volg eerst 'Eenmalige installatie' in README.md." >&2
+    exit 1
+fi
+
+exec "$PLANNER" add "$1" "$2" --root "$PROJECT_DIR/producties"
