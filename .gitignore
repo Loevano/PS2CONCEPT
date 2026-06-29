@@ -1,0 +1,9 @@
+.venv/
+.DS_Store
+jonna_notes.txt
+__pycache__/
+*.py[cod]
+*.egg-info/
+output/*
+!output/.gitkeep
+productions/*/output/*

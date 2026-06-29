@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "id": "2627",
+  "slug": "2627-faust",
+  "title": "Faust",
+  "source": "input/J.LOEVEN20260629113927.pdf",
+  "answers": "answers/decisions.json",
+  "status": "concept_met_conflicten"
+}

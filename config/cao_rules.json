@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "scope": "Techniek en KKG; Techniek omvat volgens voetnoot 3 ook AVM",
+  "source": "Documentation/CAO NOB 2025-2027 NL.pdf",
+  "rules": [
+    {
+      "id": "cao-13-2-weekmaximum",
+      "type": "maximum_work_minutes_per_week",
+      "value": 3300,
+      "source_page": 13,
+      "source_article": "Artikel 13 lid 2"
+    },
+    {
+      "id": "cao-13-3-nachtrust",
+      "type": "minimum_rest_minutes_between_days",
+      "value": 660,
+      "source_page": 13,
+      "source_article": "Artikel 13 lid 3"
+    },
+    {
+      "id": "cao-15-vrije-periode",
+      "type": "minimum_continuous_rest_minutes_per_calendar_week",
+      "value": 2160,
+      "source_page": 14,
+      "source_article": "Artikel 15"
+    },
+    {
+      "id": "cao-18a-1-vierwekennorm",
+      "type": "target_work_minutes_per_four_weeks_fulltime",
+      "value": 9120,
+      "source_page": 16,
+      "source_article": "Artikel 18a lid 1"
+    },
+    {
+      "id": "cao-18a-2-vierwekenmaximum",
+      "type": "maximum_scheduled_minutes_per_four_weeks_fulltime",
+      "value": 10080,
+      "source_page": 16,
+      "source_article": "Artikel 18a lid 2"
+    },
+    {
+      "id": "cao-18a-3-vierwekenminimum",
+      "type": "minimum_scheduled_minutes_per_four_weeks_fulltime",
+      "value": 8160,
+      "source_page": 16,
+      "source_article": "Artikel 18a lid 3"
+    },
+    {
+      "id": "cao-18a-11-minimumdienst",
+      "type": "minimum_shift_minutes",
+      "value": 240,
+      "source_page": 16,
+      "source_article": "Artikel 18a lid 11",
+      "conditions": {
+        "work_pattern": "four_weeks"
+      }
+    },
+    {
+      "id": "cao-18a-11-geen-gebroken-dienst",
+      "type": "split_shift_allowed",
+      "value": false,
+      "source_page": 16,
+      "source_article": "Artikel 18a lid 11",
+      "conditions": {
+        "work_pattern": "four_weeks"
+      }
+    },
+    {
+      "id": "cao-19-dinerpauze",
+      "type": "dinner_break_minutes_range",
+      "minimum": 30,
+      "maximum": 60,
+      "source_page": 17,
+      "source_article": "Artikel 19"
+    },
+    {
+      "id": "cao-bijlage3-acht-vrije-dagen",
+      "type": "minimum_free_days_per_four_weeks",
+      "value": 8,
+      "source_page": 55,
+      "source_article": "Bijlage III artikel 1"
+    },
+    {
+      "id": "cao-bijlage3-max-opeenvolgende-dagen",
+      "type": "maximum_consecutive_work_days",
+      "value": 7,
+      "source_page": 55,
+      "source_article": "Bijlage III artikel 1"
+    },
+    {
+      "id": "cao-bijlage3-twaalfuursdagen",
+      "type": "maximum_days_up_to_twelve_hours_per_week",
+      "value": 2,
+      "maximum_shift_minutes": 720,
+      "source_page": 56,
+      "source_article": "Bijlage III artikel 1"
+    }
+  ],
+  "caveat": "Regels kunnen uitzonderingen en aanvullende wettelijke voorwaarden hebben. Definitieve toepassing vereist medewerker-, rooster- en contextgegevens."
+}
+
