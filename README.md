@@ -154,18 +154,18 @@ uitloop van één uur verkort naar 30 minuten.
 
 | Activiteit | Bezetting | Aanwezigheid |
 |---|---|---|
-| Voorstelling of schoolvoorstelling | AVM1 en AVM2 | Twee gewerkte uren vooraf; 60 minuten na afloop*|
-| Generale repetitie | AVM1 en AVM2 | 4,5 uur vooraf; 60 minuten na afloop*|
-| Voorgenerale orkest (VGO) of pianovoorgenerale (PVG) | AVM1 en AVM2 | Twee gewerkte uren vooraf; 60 minuten na afloop*|
-| Orkesttoneelrepetitie (OTR) of zit-/sitzprobe (ZIT) | AVM1 en AVM2 | Twee gewerkte uren vooraf; 60 minuten na afloop*|
-| Orkestrepetitie op het Hoofdtoneel | AVM1 en AVM2 | Eén uur vooraf; 60 minuten na afloop*|
-| Regierepetitie op het Hoofdtoneel | AVM1 en AVM2 | Twee uur vooraf; 60 minuten na afloop*|
-| Technische repetitie | Eén AVM'er, bij voorkeur AVM1 | Eén uur vooraf; 60 minuten na afloop*|
-| Pianotoneelrepetitie | AVM1 en AVM2 | Eén uur vooraf en 30 minuten na afloop |
-| Solistenrepetitie | AVM1 en AVM2 | 30 minuten vooraf en 30 minuten na afloop |
-| Cd-toneelrepetitie | Eén van beide AVM'ers | Eén uur vooraf en 30 minuten na afloop |
-| Belichten | Precies één van beide AVM'ers | 30 minuten vooraf en 30 minuten na afloop |
-| Piano-cd | AVM1 en AVM2 | Eén uur vooraf en 30 minuten na afloop |
+| Voorstelling of schoolvoorstelling | AVM1 en AVM2 | 120 min vooraf, 60 min na afloop*|
+| Generale repetitie | AVM1 en AVM2 | 4,5 uur vooraf, 60 min na afloop*|
+| Voorgenerale orkest (VGO) of pianovoorgenerale (PVG) | AVM1 en AVM2 | 120 min vooraf, 60 min na afloop*|
+| Orkesttoneelrepetitie (OTR) of zit-/sitzprobe (ZIT) | AVM1 en AVM2 | 120 min vooraf, 60 min na afloop*|
+| Orkestrepetitie op het Hoofdtoneel | AVM1 en AVM2 | 60 min vooraf, 60 min na afloop*|
+| Regierepetitie op het Hoofdtoneel | AVM1 en AVM2 | 120 min vooraf, 60 min na afloop*|
+| Technische repetitie | Eén AVM'er, bij voorkeur AVM1 | 60 min vooraf, 60 min na afloop*|
+| Pianotoneelrepetitie | AVM1 en AVM2 | 60 min vooraf, 30 min na afloop |
+| Solistenrepetitie | AVM1 en AVM2 | 30 min vooraf, 30 min na afloop |
+| Cd-toneelrepetitie | Eén van beide AVM'ers | 60 min vooraf, 30 min na afloop |
+| Belichten | Precies één van beide AVM'ers | 30 min vooraf, 30 min na afloop |
+| Piano-cd | AVM1 en AVM2 | 60 min vooraf en 30 min, afloop |
 | Proefbouw | AVM1 | Alleen tijdens de activiteit |
 | Ontwerpteamoverleg (OT) | AVM1 | Alleen tijdens de activiteit; verhindering handmatig controleren |
 
