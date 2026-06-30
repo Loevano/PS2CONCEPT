@@ -213,14 +213,14 @@ maakt de planner daarmee een expliciet, herleidbaar moment aan.
 
 ## Volledige beslisboom
 
-Hieronder staat de uitvoeringsvolgorde van `./generate`. Een hogere stap wordt
-altijd eerder uitgevoerd dan een lagere stap. Een uitsluiting in stap 4 stopt
-de beoordeling van die activiteit; latere bezettingsregels kunnen een
-uitgesloten activiteit dus niet opnieuw activeren.
+Zo werkt `./generate` van begin tot eind. De planner loopt de genummerde
+stappen op volgorde af. Wordt een activiteit in stap 4 uitgesloten, dan is de
+beoordeling daarvan klaar. Een latere bezettingsregel kan die activiteit niet
+alsnog activeren.
 
 ### 1. Bron kiezen en PDF uitlezen
 
-1. Los de productiereferentie op en kies de nieuwste PDF uit `input/`.
+1. Kies de nieuwste PDF uit de folder `input/`.
 2. Lees titel, planningsperiode, accountnummer, pagina's, datums, tijden,
    locaties, activiteiten, pauzes, details en losse annotaties.
 3. Normaliseer Nederlandse en Engelse vaste termen naar dezelfde interne
@@ -230,11 +230,12 @@ uitgesloten activiteit dus niet opnieuw activeren.
 5. Bewaar bronpagina en bronregel bij ieder item zodat iedere beslissing
    herleidbaar blijft.
 
-### 2. Conditionele vragen en vereisten
+### 2. Vragen die van de productie afhangen
 
-1. Bepaal welke vragen op de productie van toepassing zijn.
-2. Neem een expliciet antwoord uit `answers/decisions.json`; als dat ontbreekt,
-   probeer alleen de geconfigureerde veilige gevolgtrekkingen uit de PDF.
+1. Kijk welke vragen voor deze productie gelden.
+2. Gebruik eerst het antwoord uit `answers/decisions.json`. Staat daar niets,
+   dan gebruikt de planner alleen gevolgtrekkingen uit de PDF die vooraf als
+   veilig zijn ingesteld.
 3. Voor DNO wordt gevraagd of decorinbouw nodig is.
 4. Bij `nee` ontstaat geen Montagehalvereiste.
 5. Bij `ja`:
@@ -253,14 +254,13 @@ Per dag wordt de eerste passende afsluitregel gebruikt:
 | `Afsluiten` / `Afsluiting` | overstaan | 30 minuten |
 | `Afbouw` | niet overstaan | 60 minuten |
 
-Deze tijd wordt als daguitloop op de AVM-events van die dag gezet. Een
-specifieke dienstregel kan expliciet zijn eigen eindtijd behouden, zoals de
-zondagregel `10:00-18:00`, maar alleen wanneer die eindtijd de benodigde
-uitloop volledig bevat.
+De planner telt deze tijd op bij het laatste AVM-event van die dag. Een
+specifieke dienst mag zijn eigen eindtijd houden, bijvoorbeeld zondag
+`10:00-18:00`, zolang de benodigde uitloop daar volledig in past.
 
-### 4. Iedere activiteit afzonderlijk beoordelen
+### 4. Per activiteit bepalen of AVM nodig is
 
-Voor ieder item wordt deze beslisboom doorlopen:
+Voor iedere activiteit stelt de planner deze vragen:
 
 1. **Valt het vóór de reguliere AVM-periode?**
    - De periode begint op de dag van de eerste Hoofdtoneel-activiteit.
@@ -277,7 +277,7 @@ Voor ieder item wordt deze beslisboom doorlopen:
      DNO-studiorepetitie.
    - Bij een match: stop met reden `Geen AVM volgens uitsluiting`.
 3. **Pas alle passende bezettingsregels toe.**
-   - Het hoogste vereiste aantal blijft staan.
+   - Vragen meerdere regels om bezetting, dan blijft het hoogste aantal staan.
    - Planniveau, maximumbezetting, voorkeurspositie, standaardpositie en
      flexibele posities worden uit de passende regels overgenomen.
    - Een conditionele regel geldt alleen als het bijbehorende antwoord matcht.
@@ -327,7 +327,7 @@ De actieve bezettings- en aanwezigheidsregels zijn:
 activiteit, tenzij een afsluitmarker of specifiekere regel de eindtijd
 vervangt.
 
-### 5. Eerste verdeling over AVM1 en AVM2
+### 5. Events verdelen over AVM1 en AVM2
 
 1. Zet `richtlijn` en `gebruikelijk` tijdelijk apart.
 2. Zet ieder hard event met bezetting twee direct bij AVM1 én AVM2.
@@ -337,7 +337,7 @@ vervangt.
    - kies daarna de variant die het dichtst bij acht uur komt;
    - gebruik daarna een expliciete persoonsvoorkeur;
    - gebruik daarna de variant met de minste events;
-   - bij een volledige gelijke stand is AVM1 de vaste technische tie-break.
+   - is alles gelijk, dan kiest de planner AVM1.
 5. Een flexibel event langer dan acht uur wordt in twee aansluitende delen
    gesplitst en over AVM1/AVM2 verdeeld volgens dezelfde score.
 6. Voeg zachte events toe in volgorde `richtlijn`, daarna `gebruikelijk`, maar
@@ -347,7 +347,7 @@ vervangt.
    - het event niet met een bestaand event overlapt;
    - de bestaande dienst er niet langer door wordt.
 
-### 6. Diensten per persoon en dag berekenen
+### 6. Van events naar een dagdienst
 
 1. Verzamel alle toegewezen events per kalenderdag.
 2. Bepaal per event het verplichte aanwezigheidsvenster:
@@ -368,6 +368,31 @@ vervangt.
    - is het verplichte venster langer dan acht uur, behoud dat hele venster;
    - anders verschuif een achtuursblok zodat het verplichte venster past;
    - regels met `preserve_required_window` behouden eerst hun exacte venster.
+
+   Zonder de speciale regels en afronding ziet de kern van die berekening er
+   bijvoorbeeld zo uit:
+
+   ```python
+   from datetime import datetime, time, timedelta
+
+   target = timedelta(hours=8)
+   day_start = datetime.combine(day, time(9, 0))
+   day_end = datetime.combine(day, time(17, 0))
+
+   if day_start <= required_start and required_end <= day_end:
+       shift_start, shift_end = day_start, day_end
+   elif required_end - required_start > target:
+       shift_start, shift_end = required_start, required_end
+   else:
+       shift_start = max(
+           required_end - target,
+           min(day_start, required_start),
+       )
+       shift_end = shift_start + target
+   ```
+
+   Dit is alleen de basis. Een speciale showregel kan een ander venster
+   kiezen. Daarna volgen de afronding en rustcontrole.
 6. Bij twee voorstellingen blijven AVM1 en AVM2 op beide shows. Is het
    natuurlijke venster langer dan 13,5 uur, behoud dan de laatste 13,5 uur.
 7. Rond de start naar beneden en het einde naar boven af op halve uren.
@@ -385,10 +410,10 @@ vervangt.
     - maximaal 13,5 uur dienstduur;
     - minimaal 11 uur rust tussen opeenvolgende diensten.
 
-### 7. CAO-conflicten met TEAM-AVM proberen op te lossen
+### 7. Een CAO-conflict proberen op te lossen met TEAM-AVM
 
-Zolang een primaire dienst een CAO-conflict heeft, herhaalt de planner
-maximaal 500 keer:
+Heeft een dienst van AVM1 of AVM2 een CAO-conflict, dan probeert de planner
+events naar TEAM-AVM te verplaatsen. Dat gebeurt maximaal 500 keer:
 
 1. Bekijk eerst AVM1, daarna AVM2, en daarbinnen de diensten op datum.
 2. Maak een lijst van events die uit de conflictdienst mogen worden verplaatst.
@@ -424,7 +449,7 @@ De numerieke TEAM-volgorde is laag naar hoog:
 | 20 | Voorstelling/schoolvoorstelling; minimaal één primaire AVM blijft |
 | 100 | Geen specifieke prioriteitsregel; alleen indien toegestaan en nodig |
 
-### 8. Dekking, status en uitvoer
+### 8. Controleren en uitvoer schrijven
 
 1. Tel per bron-event hoeveel unieke posities het dekken, inclusief TEAM-AVM.
 2. Voeg een blokkerende reden toe voor:
