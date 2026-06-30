@@ -149,8 +149,7 @@ Een eindtijd na middernacht wordt op de volgende kalenderdag gezet.
 
 Onderstaande tabel bevat de belangrijkste actieve regels. Tenzij een
 afwijkende tijd staat vermeld, rekent de planner met aanwezigheid vanaf één
-uur vóór tot één uur na de activiteit. Bij overstaan wordt iedere genoemde
-uitloop van één uur verkort naar 30 minuten.
+uur vóór tot één uur na de activiteit.
 
 | Activiteit | Bezetting | Aanwezigheid |
 |---|---|---|
@@ -168,6 +167,8 @@ uitloop van één uur verkort naar 30 minuten.
 | Piano-cd | AVM1 en AVM2 | 60 min vooraf, 30 min na afloop |
 | Proefbouw | AVM1 | Alleen tijdens de activiteit |
 | Ontwerpteamoverleg (OT) | AVM1 | Alleen tijdens de activiteit; verhindering handmatig controleren |
+
+Bij overstaan wordt iedere genoemde uitloop van één uur verkort naar 30 minuten.*
 
 Lunch en diner tellen niet mee als gewerkte voorbereidingstijd. Een
 schoolvoorstelling om 13:30 met een lunchpauze in de voorbereiding krijgt
