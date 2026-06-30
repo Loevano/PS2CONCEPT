@@ -11,6 +11,7 @@ from autoplanner.export import (
 from autoplanner.parser import parse_page_texts
 from autoplanner.shift_planner import (
     _activity_buffer_minutes,
+    _team_replacement_priority,
     build_cao_resolved_assignments,
     plan_daily_shifts,
     plan_daily_shifts_for_items,
@@ -1041,6 +1042,10 @@ class ParserTests(unittest.TestCase):
         for item in rehearsals:
             self.assertEqual(item.avm_required_count, 2)
             self.assertEqual(item.avm_call_time.strftime("%H:%M"), "11:30")
+        self.assertEqual(
+            [_team_replacement_priority(item, rules) for item in rehearsals],
+            [10, 8, 8],
+        )
 
         shifts = plan_daily_shifts(schedule, "AVM1", rules)
         self.assertEqual(shifts[1].start.strftime("%H:%M"), "09:00")

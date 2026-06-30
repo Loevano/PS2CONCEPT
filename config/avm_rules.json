@@ -692,7 +692,7 @@
       {
         "description": "Voorgenerales worden alleen laat in de CAO-oplossing overgenomen.",
         "activity_patterns": [
-          "^voorgenerale(?:\\s+.*)?$"
+          "^(?:piano\\s+)?voorgenerale(?:\\s+.*)?$"
         ],
         "priority": 8
       },
