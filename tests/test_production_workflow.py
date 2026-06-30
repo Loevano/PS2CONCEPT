@@ -117,6 +117,54 @@ class ProductionWorkflowTests(unittest.TestCase):
                 (directory / "output" / "issues.txt").read_text(encoding="utf-8"),
             )
 
+    def test_generate_all_regenerates_every_production(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "producties"
+            directories = []
+            schedules = []
+            for slug in ("9997-alpha", "9998-beta"):
+                main(["init", slug, "--root", str(root)])
+                year, name = slug.split("-", maxsplit=1)
+                directory = root / year / name
+                directories.append(directory)
+                pdf = directory / "input" / "planning.pdf"
+                pdf.write_bytes(b"%PDF placeholder for mocked extraction")
+                schedules.append(
+                    parse_page_texts(
+                        [
+                            "\n".join(
+                                [
+                                    f"HNB 3 - {name.title()}",
+                                    "maandag 2 november 2026",
+                                    "Hoofdtoneel",
+                                    "19.30 - 22.00 Voorstelling 1",
+                                ]
+                            )
+                        ],
+                        source_file=str(pdf),
+                    )
+                )
+
+            with patch(
+                "autoplanner.cli.extract_schedule", side_effect=schedules
+            ) as extract:
+                result = main(
+                    [
+                        "generate",
+                        "--all",
+                        "--root",
+                        str(root),
+                        "--rules",
+                        str(PROJECT_ROOT / "config" / "avm_rules.json"),
+                    ]
+                )
+
+            self.assertEqual(result, 0)
+            self.assertEqual(extract.call_count, 2)
+            for directory in directories:
+                for filename in OUTPUT_FILES.values():
+                    self.assertTrue((directory / "output" / filename).is_file())
+
     def test_generate_creates_answer_template_for_open_questions(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary) / "producties"

@@ -4,8 +4,8 @@ set -eu
 PROJECT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 if [ "$#" -ne 1 ]; then
-    echo "Gebruik: ./generate <productienaam>" >&2
-    echo "Voorbeeld: ./generate cinderella" >&2
+    echo "Gebruik: ./generate <productienaam|--all>" >&2
+    echo "Voorbeelden: ./generate cinderella, ./generate --all" >&2
     exit 2
 fi
 

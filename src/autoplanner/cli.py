@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections import Counter
 from pathlib import Path
 
@@ -18,6 +19,7 @@ from .parser import extract_schedule
 from .production import (
     concept_status,
     initialise_production,
+    list_production_directories,
     load_manifest,
     output_paths,
     resolve_answers_path,
@@ -88,9 +90,17 @@ def build_parser() -> argparse.ArgumentParser:
     generate = subparsers.add_parser(
         "generate", help="Genereer alle conceptuitvoer van een productiedossier"
     )
-    generate.add_argument(
+    generate_target = generate.add_mutually_exclusive_group(required=True)
+    generate_target.add_argument(
         "production",
+        nargs="?",
         help="Productienaam, jaar-productienaam of pad naar productiedossier",
+    )
+    generate_target.add_argument(
+        "--all",
+        dest="generate_all",
+        action="store_true",
+        help="Genereer alle productiedossiers opnieuw",
     )
     generate.add_argument(
         "--root",
@@ -185,6 +195,41 @@ def run_add(args: argparse.Namespace) -> int:
 
 
 def run_generate(args: argparse.Namespace) -> int:
+    if args.generate_all:
+        productions = list_production_directories(args.root)
+        if not productions:
+            raise SystemExit(f"Geen productiedossiers gevonden in: {args.root}")
+
+        failures: list[tuple[Path, str]] = []
+        print(f"Alle producties genereren: {len(productions)} dossier(s)")
+        for index, production_dir in enumerate(productions, start=1):
+            print(f"\n[{index}/{len(productions)}] {production_dir.name}")
+            production_args = argparse.Namespace(
+                **{
+                    **vars(args),
+                    "production": str(production_dir),
+                    "generate_all": False,
+                }
+            )
+            try:
+                run_generate(production_args)
+            except SystemExit as error:
+                message = str(error)
+                failures.append((production_dir, message))
+                print(f"Mislukt: {message}", file=sys.stderr)
+
+        if failures:
+            print(
+                f"\n{len(failures)} van {len(productions)} producties mislukt:",
+                file=sys.stderr,
+            )
+            for production_dir, message in failures:
+                print(f"- {production_dir}: {message}", file=sys.stderr)
+            return 1
+
+        print(f"\nAlle {len(productions)} producties zijn opnieuw gegenereerd.")
+        return 0
+
     try:
         reference = resolve_production_reference(args.production, args.root)
         production_dir, manifest = load_manifest(reference)

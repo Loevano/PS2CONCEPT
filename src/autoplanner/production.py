@@ -83,6 +83,17 @@ def initialise_production(
     return production_dir
 
 
+def list_production_directories(root: str | Path = "producties") -> list[Path]:
+    production_root = Path(root).expanduser().resolve()
+    if not production_root.is_dir():
+        return []
+    return sorted(
+        manifest.parent
+        for manifest in production_root.glob(f"*/*/{MANIFEST_NAME}")
+        if manifest.is_file()
+    )
+
+
 def load_manifest(production_dir: str | Path) -> tuple[Path, dict[str, Any]]:
     directory = Path(production_dir).expanduser().resolve()
     manifest_path = directory / MANIFEST_NAME

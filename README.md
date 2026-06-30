@@ -67,6 +67,12 @@ Bestaat dezelfde productienaam in meerdere seizoenen, voeg dan het seizoen toe:
 Je kunt dit commando veilig opnieuw uitvoeren. De planner vervangt dan de
 eerder gemaakte bestanden in `output/`.
 
+Om alle productiedossiers opnieuw te genereren:
+
+```bash
+./generate --all
+```
+
 ### 4. Beantwoord eventuele vragen
 
 Als noodzakelijke informatie ontbreekt, maakt de planner dit bestand:
