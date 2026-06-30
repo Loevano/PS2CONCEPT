@@ -154,13 +154,13 @@ uitloop van één uur verkort naar 30 minuten.
 
 | Activiteit | Bezetting | Aanwezigheid |
 |---|---|---|
-| Voorstelling of schoolvoorstelling | AVM1 en AVM2 | Twee gewerkte uren vooraf; 60 minuten na afloop, of 30 minuten bij overstaan |
-| Generale repetitie | AVM1 en AVM2 | 4,5 uur vooraf; 60 minuten na afloop, of 30 minuten bij overstaan |
-| Voorgenerale orkest (VGO) of pianovoorgenerale (PVG) | AVM1 en AVM2 | Twee gewerkte uren vooraf; 30 minuten na afloop bij overstaan, anders 60 minuten |
-| Orkesttoneelrepetitie (OTR) of zit-/sitzprobe (ZIT) | AVM1 en AVM2 | Twee gewerkte uren vooraf; 60 minuten na afloop, of 30 minuten bij overstaan |
-| Orkestrepetitie op het Hoofdtoneel | AVM1 en AVM2 | Eén uur vooraf; 60 minuten na afloop, of 30 minuten bij overstaan |
-| Regierepetitie op het Hoofdtoneel | AVM1 en AVM2 | Twee uur vooraf; 60 minuten na afloop, of 30 minuten bij overstaan |
-| Technische repetitie | Eén AVM'er, bij voorkeur AVM1 | Eén uur vooraf; 60 minuten na afloop, of 30 minuten bij overstaan |
+| Voorstelling of schoolvoorstelling | AVM1 en AVM2 | Twee gewerkte uren vooraf; 60 minuten na afloop*|
+| Generale repetitie | AVM1 en AVM2 | 4,5 uur vooraf; 60 minuten na afloop*|
+| Voorgenerale orkest (VGO) of pianovoorgenerale (PVG) | AVM1 en AVM2 | Twee gewerkte uren vooraf; 60 minuten na afloop*|
+| Orkesttoneelrepetitie (OTR) of zit-/sitzprobe (ZIT) | AVM1 en AVM2 | Twee gewerkte uren vooraf; 60 minuten na afloop*|
+| Orkestrepetitie op het Hoofdtoneel | AVM1 en AVM2 | Eén uur vooraf; 60 minuten na afloop*|
+| Regierepetitie op het Hoofdtoneel | AVM1 en AVM2 | Twee uur vooraf; 60 minuten na afloop*|
+| Technische repetitie | Eén AVM'er, bij voorkeur AVM1 | Eén uur vooraf; 60 minuten na afloop*|
 | Pianotoneelrepetitie | AVM1 en AVM2 | Eén uur vooraf en 30 minuten na afloop |
 | Solistenrepetitie | AVM1 en AVM2 | 30 minuten vooraf en 30 minuten na afloop |
 | Cd-toneelrepetitie | Eén van beide AVM'ers | Eén uur vooraf en 30 minuten na afloop |
