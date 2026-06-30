@@ -451,7 +451,7 @@ def render_text(schedule: ProductionSchedule, rules: dict | None = None) -> str:
         "CAO-controle: gedeeltelijk; een volledig persoonlijk rooster blijft vereist.",
         "Verdeling: AVM1 leidt; TEAM-AVM diensten lossen CAO-conflicten op.",
         "Belichten vereist één AVM'er en wordt flexibel over AVM1/AVM2 verdeeld.",
-        "Dienstregel: standaard 09:00-17:00; gewone activiteiten 1 uur ervoor/erna; belichten 30 min ervoor/erna; SR/PTR 30 min erna; voorstelling/generale relatief aan aanvang.",
+        "Dienstregel: standaard 09:00-17:00; uitloop wordt vanaf de werkelijke eindtijd berekend; uitzonderingen staan in de actieve regels.",
         "Legenda:",
         *COMPACT_ACTIVITY_LEGEND_LINES,
     ]

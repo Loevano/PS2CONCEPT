@@ -10,6 +10,7 @@ from autoplanner.export import (
 )
 from autoplanner.parser import parse_page_texts
 from autoplanner.shift_planner import (
+    _activity_buffer_minutes,
     build_cao_resolved_assignments,
     plan_daily_shifts,
     plan_daily_shifts_for_items,
@@ -859,8 +860,8 @@ class ParserTests(unittest.TestCase):
 
         self.assertEqual(schedule.items[0].avm_preferred_position, "AVM1")
         shift = plan_daily_shifts(schedule, "AVM1", rules)[0]
-        self.assertEqual(shift.start.strftime("%H:%M"), "07:00")
-        self.assertEqual(shift.end.strftime("%H:%M"), "15:00")
+        self.assertEqual(shift.start.strftime("%H:%M"), "07:30")
+        self.assertEqual(shift.end.strftime("%H:%M"), "15:30")
 
     def test_dno_preparing_belichten_is_customary_only_on_first_matching_day(self):
         schedule = parse_page_texts(
@@ -1372,6 +1373,63 @@ class ParserTests(unittest.TestCase):
 
         self.assertEqual(shift.start.strftime("%H:%M"), "13:00")
         self.assertEqual(shift.end.strftime("%H:%M"), "21:00")
+
+    def test_default_rules_use_correct_event_specific_buffers(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "DNO 4 - Testopera",
+                        "donderdag 3 december 2026",
+                        "Hoofdtoneel",
+                        "09.00 - 10.00 OT meeting",
+                        "10.00 - 11.00 Presentatie cast & huis",
+                        "11.00 - 12.00 Opbouwen/voorbereiden belichten",
+                        "12.00 - 13.00 Oplevering decor",
+                        "13.00 - 14.00 Decorinbouw",
+                        "14.00 - 15.00 Piano CD",
+                        "15.00 - 16.00 Cd toneelrepetitie",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        shift_rules = rules["shift_planning"]
+
+        buffers = {
+            item.activity: _activity_buffer_minutes(item, shift_rules)[:2]
+            for item in schedule.items
+        }
+
+        self.assertEqual(buffers["OT meeting"], (0, 0))
+        self.assertEqual(buffers["Presentatie cast & huis"], (0, 0))
+        self.assertEqual(
+            buffers["Opbouwen/voorbereiden belichten"], (30, 30)
+        )
+        self.assertEqual(buffers["Oplevering decor"], (0, 0))
+        self.assertEqual(buffers["Decorinbouw"], (0, 0))
+        self.assertEqual(buffers["Piano CD"], (60, 30))
+        self.assertEqual(buffers["Cd toneelrepetitie"], (60, 30))
+
+    def test_generale_wrap_is_calculated_from_actual_end_time(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "donderdag 3 december 2026",
+                        "Hoofdtoneel",
+                        "19.30 - 22.00 Generale",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        shift = plan_daily_shifts(schedule, "AVM1", rules)[0]
+
+        self.assertEqual(shift.start.strftime("%H:%M"), "15:00")
+        self.assertEqual(shift.end.strftime("%H:%M"), "23:00")
 
     def test_cast_and_house_presentation_code_is_rendered(self):
         schedule = parse_page_texts(

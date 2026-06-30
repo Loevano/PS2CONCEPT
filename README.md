@@ -315,31 +315,31 @@ De actieve bezettings- en aanwezigheidsregels zijn:
 | Activiteit/geval | Bezetting | Minuten vóór aanvang | Minuten na afloop | Niveau/bijzonderheid |
 |---|---:|---:|---:|---|
 | Proefbouw | AVM1 | 0 | 0 | verplicht |
-| OT/ontwerpteam | AVM1 | 60 | 60 | verplicht, verhindering controleren |
-| DNO cast-en-huispresentatie | AVM1 | 60 | 60 | verplicht |
-| DNO voorbereiden belichten, eerste Hoofdtoneeldag | AVM1 | 60 | 60 | gebruikelijk |
-| Zelfde, decorinbouw bevestigd | AVM1 + AVM2 | 60 | 60 | verplicht |
+| OT/ontwerpteam | AVM1 | 0 | 0 | verplicht, vergadering; verhindering controleren |
+| DNO cast-en-huispresentatie | AVM1 | 0 | 0 | verplicht |
+| DNO voorbereiden belichten, eerste Hoofdtoneeldag | AVM1 | 30 | 30 | gebruikelijk, gelijk aan belichten |
+| Zelfde, decorinbouw bevestigd | AVM1 + AVM2 | 30 | 30 | verplicht, gelijk aan belichten |
 | Grote DNO-studiorepetitie | AVM1 | 60 | 60 | verplicht |
-| DNO Montagehal/decorinbouw | AVM1 | 60 | 60 | verplicht |
-| Oplevering decor | één flexibele AVM | 60 | 60 | richtlijn |
+| DNO Montagehal/decorinbouw | AVM1 | 0 | 0 | verplicht |
+| Oplevering decor | één flexibele AVM | 0 | 0 | richtlijn |
 | RR op Hoofdtoneel | AVM1 + AVM2 | 120 | 60 | verplicht |
-| Piano CD | AVM1 + AVM2 | 60 | 60 | verplicht, lage TEAM-prioriteit |
+| Piano CD | AVM1 + AVM2 | 60 | 30 | verplicht, lage TEAM-prioriteit |
 | Voorstelling/schoolvoorstelling | AVM1 + AVM2 | 120 gewerkte minuten¹ | 60 | verplicht |
-| Generale | AVM1 + AVM2 | 270 | afhankelijk van de activiteit² | verplicht |
+| Generale | AVM1 + AVM2 | 270 | 60 | verplicht |
 | VGO/PVG | AVM1 + AVM2 | 120 gewerkte minuten¹ | 30 bij overstaan, anders 60 | verplicht |
 | OTR | AVM1 + AVM2 | 120 gewerkte minuten¹ | 60 | verplicht |
 | Zit/Sitzprobe (`ZIT`) | AVM1 + AVM2 | 120 gewerkte minuten¹ | 60 | verplicht |
 | Pianotoneelrepetitie | AVM1 + AVM2 | 60 | 30 | verplicht |
 | Technische repetitie | één AVM, voorkeur AVM1 | 60 | 60 | verplicht |
-| CD-toneelrepetitie | één flexibele AVM | 60 | 60 | verplicht |
+| CD-toneelrepetitie | één flexibele AVM | 60 | 30 | verplicht |
 | Belichten | exact één flexibele AVM | 30 | 30 | verplicht |
 | Orkestrepetitie op Hoofdtoneel | AVM1 + AVM2 | 60 | 60 | verplicht |
 | Solistenrepetitie | AVM1 + AVM2 | 30 | 30 | verplicht |
 
 ¹ Lunch- en dinerpauzes tellen niet mee in de minuten vóór aanvang.
 
-² Een generale eindigt 240 minuten na de aanvangstijd. Het aantal minuten na
-afloop hangt daardoor af van de duur van de generale.
+De minuten na afloop worden voor ieder event vanaf de werkelijke eindtijd
+berekend, niet vanaf de aanvangstijd.
 
 ### 5. Events verdelen over AVM1 en AVM2
 
@@ -374,8 +374,8 @@ afloop hangt daardoor af van de duur van de generale.
    - schoolvoorstelling om 13:30;
    - voorstelling om 14:00;
    - overige voorstelling;
-   - generale om 14:00: `10:00-18:00`;
-   - overige generale: 4,5 uur vóór tot 4 uur na aanvang.
+   - generale om 14:00: start om `10:00`, einde één uur na afloop;
+   - overige generale: 4,5 uur vóór aanvang tot één uur na afloop.
 4. Neem de vroegste vereiste start en de laatste vereiste eindtijd van de dag.
 5. Bereken de basisdienst:
    - past alles binnen 09:00-17:00, gebruik dan 09:00-17:00;
@@ -503,8 +503,8 @@ Bij één voorstelling op zondag om 14:00 is de dienst vast 10:00-18:00, mits
 18:00 ook de vereiste uitloop of afbouw na de show volledig dekt. Anders wordt
 de eindtijd vanaf de werkelijke showeindtijd berekend. Deze regel geldt niet op
 een zondag met twee voorstellingen.
-Generale repetities behouden het relatieve venster van 4,5 uur vóór tot 4 uur
-na aanvang. Een generale met aanvang 14:00 wordt 10:00-18:00 geroosterd.
+Generale repetities beginnen 4,5 uur vóór aanvang en eindigen één uur na de
+werkelijke eindtijd. Een generale met aanvang 14:00 begint om 10:00.
 Het tekstrooster vermeldt afwijkingen van de streefduur niet in de opmerkingen.
 Diensten die korter uitkomen, beginnen eerst eerder om de achturige streefduur
 te halen, maar de extra streeftijdaanvulling vervroegt een dienst nooit tot vóór

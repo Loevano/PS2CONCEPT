@@ -153,10 +153,25 @@ def _required_window(
                     item.avm_call_time,
                     planned_end,
                 )
-            elif "start_offset_minutes" in rule and "end_offset_minutes" in rule:
+            elif "start_offset_minutes" in rule and (
+                "end_offset_minutes" in rule
+                or "end_after_activity_minutes" in rule
+            ):
                 candidate = (
                     item.start + timedelta(minutes=int(rule["start_offset_minutes"])),
-                    item.start + timedelta(minutes=int(rule["end_offset_minutes"])),
+                    (
+                        item_end
+                        + timedelta(minutes=int(rule["end_after_activity_minutes"]))
+                        if "end_after_activity_minutes" in rule
+                        else item.start
+                        + timedelta(minutes=int(rule["end_offset_minutes"]))
+                    ),
+                )
+            elif "start" in rule and "end_after_activity_minutes" in rule:
+                candidate = (
+                    _at(item.day, str(rule["start"])),
+                    item_end
+                    + timedelta(minutes=int(rule["end_after_activity_minutes"])),
                 )
             else:
                 candidate = (

@@ -450,6 +450,36 @@
         "after_minutes": 0
       },
       {
+        "id": "vergaderingen-en-presentaties-geen-opbouw-of-afbouw",
+        "description": "OT-/ontwerpteamvergaderingen en de DNO-presentatie van cast en huis hebben geen extra opbouw- of afbouwtijd.",
+        "activity_patterns": [
+          "^(?:OT|ontwerpteam)(?:\\s+(?:meeting|overleg))?(?:\\s+.*)?$",
+          "^(?:presentatie\\s+)?cast\\s*(?:&|en)\\s*huis(?:\\s+presentatie)?$"
+        ],
+        "before_minutes": 0,
+        "after_minutes": 0
+      },
+      {
+        "id": "dno-decor-en-montage-geen-opbouw-of-afbouw",
+        "description": "Oplevering decor en DNO-decorinbouw/montage hebben geen extra opbouw- of afbouwtijd.",
+        "activity_patterns": [
+          "^oplevering(?:\\s+van)?\\s+(?:het\\s+)?decor(?:\\s+.*)?$",
+          "^decorinbouw(?:\\s+.*)?$",
+          "^(?:DNO\\s+)?montage(?:\\s+.*)?$"
+        ],
+        "before_minutes": 0,
+        "after_minutes": 0
+      },
+      {
+        "id": "dno-voorbereiden-belichten-halfuur-voor-en-na",
+        "description": "DNO voorbereiden voor belichten heeft hetzelfde aanwezigheidsvenster als belichten: 30 minuten voor aanvang en 30 minuten na de werkelijke eindtijd.",
+        "activity_patterns": [
+          "^(?:opbouwen|voorbereiden|opbouwen/voorbereiden).*\\bbelichten\\b"
+        ],
+        "before_minutes": 30,
+        "after_minutes": 30
+      },
+      {
         "id": "orkesttoneelrepetitie-en-zit-twee-uur-vooraf",
         "description": "Bij een orkesttoneelrepetitie, Zit of Sitzprobe is AVM minimaal twee gewerkte uren voor aanvang aanwezig; pauzes tellen niet mee.",
         "activity_patterns": [
@@ -491,6 +521,15 @@
         "description": "Na een pianotoneelrepetitie hoeft AVM nog 30 minuten te blijven.",
         "activity_patterns": [
           "^piano\\s+toneelrepetitie(?:\\s+.*)?$"
+        ],
+        "after_minutes": 30
+      },
+      {
+        "id": "piano-cd-en-cd-toneel-halfuur-na",
+        "description": "Na Piano CD en een cd-toneelrepetitie is 30 minuten afbouwtijd nodig, gerekend vanaf de werkelijke eindtijd.",
+        "activity_patterns": [
+          "^piano\\s+CD(?:\\s+.*)?$",
+          "^cd\\s+toneelrepetitie(?:\\s+.*)?$"
         ],
         "after_minutes": 30
       }
@@ -550,22 +589,22 @@
       },
       {
         "id": "generale-om-1400",
-        "description": "Een generale met aanvang 14:00 wordt geroosterd van 10:00 tot 18:00.",
+        "description": "Een generale met aanvang 14:00 begint om 10:00 en eindigt één uur na de werkelijke eindtijd.",
         "activity_patterns": [
           "^generale(?:\\s+repetitie)?$"
         ],
         "activity_start": "14:00",
         "start": "10:00",
-        "end": "18:00"
+        "end_after_activity_minutes": 60
       },
       {
         "id": "generale-relatief-aan-aanvang",
-        "description": "Een generale wordt relatief aan de aanvang geroosterd: 4,5 uur ervoor tot 4 uur erna (19:30 wordt 15:00-23:30).",
+        "description": "Een generale begint 4,5 uur voor aanvang en eindigt één uur na de werkelijke eindtijd.",
         "activity_patterns": [
           "^generale(?:\\s+repetitie)?$"
         ],
         "start_offset_minutes": -270,
-        "end_offset_minutes": 240
+        "end_after_activity_minutes": 60
       }
     ],
     "double_performance_rule": {
