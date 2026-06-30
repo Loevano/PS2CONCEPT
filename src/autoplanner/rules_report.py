@@ -109,7 +109,7 @@ def render_rules_text(avm_rules: dict, cao_rules: dict) -> str:
             "4. Opbouw van een dagdienst — automatisch actief",
             "--------------------------------------------------",
             f"- Standaarddienst: {shift.get('default_shift_start', '09:00')}-{shift.get('default_shift_end', '17:00')}.",
-            f"- Gewone activiteiten worden afgedekt vanaf {shift.get('activity_buffer_before_minutes', 60)} minuten voor aanvang tot {shift.get('activity_buffer_after_minutes', 60)} minuten na afloop.",
+            f"- Gewone activiteiten worden afgedekt vanaf {shift.get('activity_buffer_before_minutes', 60)} minuten voor aanvang tot {shift.get('activity_buffer_after_minutes', 60)} minuten na afloop; bij overstaan wordt een uitloop van 60 minuten altijd 30 minuten.",
             "- Als het vereiste venster niet in de standaarddienst past, wordt het blok verschoven.",
             "- De start kan later worden gezet om de minimale nachtrust te behouden, zolang alle activiteiten nog worden afgedekt.",
             f"- Diensten boven {_hours(int(shift.get('maximum_shift_minutes', 720)))} worden opgelost via TEAM-AVM of, als dat niet lukt, als CAO-conflict gemarkeerd.",

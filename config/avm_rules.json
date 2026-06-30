@@ -424,7 +424,7 @@
     "day_closing_rules": [
       {
         "id": "afsluiten-is-overstaan",
-        "description": "Afsluiten of Afsluiting betekent overstaan: er wordt 30 minuten afbouwtijd na het laatste AVM-event ingepland.",
+        "description": "Afsluiten of Afsluiting betekent overstaan: iedere afbouwtijd van 60 minuten na afloop wordt verkort naar 30 minuten.",
         "activity_patterns": [
           "^afsluit(?:en|ing)(?:\\s+.*)?$"
         ],
@@ -537,7 +537,7 @@
     "special_shift_rules": [
       {
         "id": "enkele-zondagvoorstelling-om-1400",
-        "description": "Bij één voorstelling op zondag met aanvang 14:00 loopt de AVM-dienst van 10:00 tot 18:00.",
+        "description": "Bij één voorstelling op zondag met aanvang 14:00 loopt de AVM-dienst normaal van 10:00 tot 18:00; bij overstaan eindigt de dienst 30 minuten na de voorstelling.",
         "activity_patterns": [
           "^voorstelling(?:\\s+\\d+)?$",
           "^schoolvoorstelling$"
@@ -550,12 +550,11 @@
         "start": "10:00",
         "end": "18:00",
         "require_end_to_cover_activity_buffer": true,
-        "preserve_end": true,
         "preserve_required_window": true
       },
       {
         "id": "schoolvoorstelling-om-1330",
-        "description": "Een schoolvoorstelling begint minimaal twee gewerkte uren voor aanvang en eindigt één uur na het einde van de voorstelling; lunch- en dinerpauzes tellen niet mee.",
+        "description": "Een schoolvoorstelling begint minimaal twee gewerkte uren voor aanvang en eindigt 60 minuten na afloop, of 30 minuten na afloop bij overstaan; lunch- en dinerpauzes tellen niet mee.",
         "activity_patterns": [
           "^schoolvoorstelling$"
         ],
@@ -566,7 +565,7 @@
       },
       {
         "id": "voorstelling-om-1400",
-        "description": "Een voorstelling met aanvang 14:00 begint minimaal twee gewerkte uren vooraf, exclusief pauzes, en eindigt één uur na het einde van de voorstelling.",
+        "description": "Een voorstelling met aanvang 14:00 begint minimaal twee gewerkte uren vooraf, exclusief pauzes, en eindigt 60 minuten na afloop, of 30 minuten na afloop bij overstaan.",
         "activity_patterns": [
           "^voorstelling(?:\\s+\\d+)?$",
           "^schoolvoorstelling$"
@@ -578,7 +577,7 @@
       },
       {
         "id": "voorstelling-relatief-aan-aanvang",
-        "description": "Een voorstelling begint minimaal twee gewerkte uren voor aanvang, exclusief pauzes, en eindigt één uur na het einde van de voorstelling.",
+        "description": "Een voorstelling begint minimaal twee gewerkte uren voor aanvang, exclusief pauzes, en eindigt 60 minuten na afloop, of 30 minuten na afloop bij overstaan.",
         "activity_patterns": [
           "^voorstelling(?:\\s+\\d+)?$",
           "^schoolvoorstelling$"
@@ -589,7 +588,7 @@
       },
       {
         "id": "generale-om-1400",
-        "description": "Een generale met aanvang 14:00 begint om 10:00 en eindigt één uur na de werkelijke eindtijd.",
+        "description": "Een generale met aanvang 14:00 begint om 10:00 en eindigt 60 minuten na de werkelijke eindtijd, of 30 minuten erna bij overstaan.",
         "activity_patterns": [
           "^generale(?:\\s+repetitie)?$"
         ],
@@ -599,7 +598,7 @@
       },
       {
         "id": "generale-relatief-aan-aanvang",
-        "description": "Een generale begint 4,5 uur voor aanvang en eindigt één uur na de werkelijke eindtijd.",
+        "description": "Een generale begint 4,5 uur voor aanvang en eindigt 60 minuten na de werkelijke eindtijd, of 30 minuten erna bij overstaan.",
         "activity_patterns": [
           "^generale(?:\\s+repetitie)?$"
         ],

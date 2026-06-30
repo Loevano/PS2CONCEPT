@@ -499,6 +499,26 @@ class ParserTests(unittest.TestCase):
             self.assertEqual(shift.start.strftime("%H:%M"), "10:00")
             self.assertEqual(shift.end.strftime("%H:%M"), "18:00")
 
+    def test_single_sunday_performance_uses_half_hour_load_out_when_staying(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "zondag 20 december 2026",
+                        "Hoofdtoneel",
+                        "14.00 - 17.00 Voorstelling 8",
+                        "17.00 - 17.15 Afsluiten",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        for position in ("AVM1", "AVM2"):
+            shift = plan_daily_shifts(schedule, position, rules)[0]
+            self.assertEqual(shift.end.strftime("%H:%M"), "17:30")
+
     def test_sunday_1400_rule_does_not_apply_to_double_performance_day(self):
         schedule = parse_page_texts(
             [
@@ -2772,6 +2792,48 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(rows[0][5], "x")
         self.assertEqual(rows[1][5], "")
         self.assertEqual(schedule.items[2].avm_day_wrap_minutes, 60)
+
+    def test_overstaan_reduces_every_one_hour_load_out_rule(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "maandag 7 december 2026",
+                        "Hoofdtoneel",
+                        "19.00 - 22.00 Voorstelling 1",
+                        "22.00 - 22.15 Afsluiten",
+                        "dinsdag 8 december 2026",
+                        "Hoofdtoneel",
+                        "19.00 - 22.00 Generale",
+                        "22.00 - 22.15 Afsluiten",
+                        "woensdag 9 december 2026",
+                        "Hoofdtoneel",
+                        "19.00 - 22.00 Orkesttoneelrepetitie",
+                        "22.00 - 22.15 Afsluiten",
+                        "donderdag 10 december 2026",
+                        "Hoofdtoneel",
+                        "14.00 - 22.00 Orkestrepetitie",
+                        "22.00 - 22.15 Afsluiten",
+                        "vrijdag 11 december 2026",
+                        "Hoofdtoneel",
+                        "17.00 - 22.00 Regierepetitie",
+                        "22.00 - 22.15 Afsluiten",
+                        "zaterdag 12 december 2026",
+                        "Hoofdtoneel",
+                        "14.00 - 22.00 Technische repetitie",
+                        "22.00 - 22.15 Afsluiten",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        shifts = plan_daily_shifts(schedule, "AVM1", rules)
+        self.assertEqual(len(shifts), 6)
+        self.assertTrue(
+            all(shift.end.strftime("%H:%M") == "22:30" for shift in shifts)
+        )
 
 
 if __name__ == "__main__":

@@ -149,17 +149,18 @@ Een eindtijd na middernacht wordt op de volgende kalenderdag gezet.
 
 Onderstaande tabel bevat de belangrijkste actieve regels. Tenzij een
 afwijkende tijd staat vermeld, rekent de planner met aanwezigheid vanaf één
-uur vóór tot één uur na de activiteit.
+uur vóór tot één uur na de activiteit. Bij overstaan wordt iedere genoemde
+uitloop van één uur verkort naar 30 minuten.
 
 | Activiteit | Bezetting | Aanwezigheid |
 |---|---|---|
-| Voorstelling of schoolvoorstelling | AVM1 en AVM2 | Twee gewerkte uren vooraf; één uur na afloop |
-| Generale repetitie | AVM1 en AVM2 | 4,5 uur vooraf; één uur na afloop |
+| Voorstelling of schoolvoorstelling | AVM1 en AVM2 | Twee gewerkte uren vooraf; 60 minuten na afloop, of 30 minuten bij overstaan |
+| Generale repetitie | AVM1 en AVM2 | 4,5 uur vooraf; 60 minuten na afloop, of 30 minuten bij overstaan |
 | Voorgenerale orkest (VGO) of pianovoorgenerale (PVG) | AVM1 en AVM2 | Twee gewerkte uren vooraf; 30 minuten na afloop bij overstaan, anders 60 minuten |
-| Orkesttoneelrepetitie (OTR) of zit-/sitzprobe (ZIT) | AVM1 en AVM2 | Twee gewerkte uren vooraf; één uur na afloop |
-| Orkestrepetitie op het Hoofdtoneel | AVM1 en AVM2 | Eén uur vooraf en één uur na afloop |
-| Regierepetitie op het Hoofdtoneel | AVM1 en AVM2 | Twee uur vooraf en één uur na afloop |
-| Technische repetitie | Eén AVM'er, bij voorkeur AVM1 | Eén uur vooraf en één uur na afloop |
+| Orkesttoneelrepetitie (OTR) of zit-/sitzprobe (ZIT) | AVM1 en AVM2 | Twee gewerkte uren vooraf; 60 minuten na afloop, of 30 minuten bij overstaan |
+| Orkestrepetitie op het Hoofdtoneel | AVM1 en AVM2 | Eén uur vooraf; 60 minuten na afloop, of 30 minuten bij overstaan |
+| Regierepetitie op het Hoofdtoneel | AVM1 en AVM2 | Twee uur vooraf; 60 minuten na afloop, of 30 minuten bij overstaan |
+| Technische repetitie | Eén AVM'er, bij voorkeur AVM1 | Eén uur vooraf; 60 minuten na afloop, of 30 minuten bij overstaan |
 | Pianotoneelrepetitie | AVM1 en AVM2 | Eén uur vooraf en 30 minuten na afloop |
 | Solistenrepetitie | AVM1 en AVM2 | 30 minuten vooraf en 30 minuten na afloop |
 | Cd-toneelrepetitie | Eén van beide AVM'ers | Eén uur vooraf en 30 minuten na afloop |
@@ -174,10 +175,11 @@ daarom een oproeptijd van 11:00.
 
 Voor enkele situaties gelden aparte diensttijden:
 
-- Een generale om 14:00 begint om 10:00 en eindigt één uur na de werkelijke
-  eindtijd.
-- Bij één zondagvoorstelling om 14:00 is de dienst 10:00-18:00, maar alleen als
-  de benodigde tijd na afloop volledig binnen die dienst past.
+- Een generale om 14:00 begint om 10:00 en eindigt 60 minuten na de werkelijke
+  eindtijd, of 30 minuten erna bij overstaan.
+- Bij één zondagvoorstelling om 14:00 is de dienst normaal 10:00-18:00, maar
+  bij overstaan eindigt de dienst 30 minuten na de voorstelling. De regel geldt
+  alleen als de benodigde tijd na afloop volledig binnen de dienst past.
 - Deze zondagregel geldt niet bij twee voorstellingen op dezelfde dag.
 - Een berekende dienststart om precies 12:00 wordt 11:30. Deze correctie
   vervalt als de dienst daardoor langer dan 13,5 uur wordt.
@@ -232,7 +234,8 @@ De planner streeft naar diensten van acht uur:
 - Een dienst duurt maximaal 13,5 uur.
 - Tussen twee diensten blijft minimaal elf uur rust.
 
-De dagafsluiting bepaalt de benodigde tijd na de laatste AVM-activiteit:
+De dagafsluiting bepaalt de benodigde tijd na de laatste AVM-activiteit. Bij
+overstaan worden alle regels met 60 minuten uitloop verkort naar 30 minuten:
 
 | Tekst in bronplanning | Betekenis | Tijd na laatste AVM-activiteit |
 |---|---|---:|
