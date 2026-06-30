@@ -165,7 +165,7 @@ uitloop van één uur verkort naar 30 minuten.
 | Solistenrepetitie | AVM1 en AVM2 | 30 min vooraf, 30 min na afloop |
 | Cd-toneelrepetitie | Eén van beide AVM'ers | 60 min vooraf, 30 min na afloop |
 | Belichten | Precies één van beide AVM'ers | 30 min vooraf, 30 min na afloop |
-| Piano-cd | AVM1 en AVM2 | 60 min vooraf en 30 min, afloop |
+| Piano-cd | AVM1 en AVM2 | 60 min vooraf, 30 min na afloop |
 | Proefbouw | AVM1 | Alleen tijdens de activiteit |
 | Ontwerpteamoverleg (OT) | AVM1 | Alleen tijdens de activiteit; verhindering handmatig controleren |
 
