@@ -8,3 +8,5 @@ output/*
 !output/.gitkeep
 /productions/
 /producties/
+/Documentation/
+
