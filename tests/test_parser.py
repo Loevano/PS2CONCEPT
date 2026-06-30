@@ -1167,7 +1167,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(shift.target_fill_minutes, 150)
         self.assertTrue(any("streefduur" in flag for flag in shift.flags))
 
-    def test_otr_requires_presence_two_hours_before_start(self):
+    def test_otr_requires_two_work_hours_before_start(self):
         schedule = parse_page_texts(
             [
                 "\n".join(
@@ -1185,7 +1185,35 @@ class ParserTests(unittest.TestCase):
 
         for position in ("AVM1", "AVM2"):
             shift = plan_daily_shifts(schedule, position, rules)[0]
-            self.assertEqual(shift.start.strftime("%H:%M"), "11:30")
+            self.assertEqual(shift.start.strftime("%H:%M"), "11:00")
+
+    def test_otr_assumes_standard_lunch_when_source_has_no_break(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "vrijdag 28 mei 2027",
+                        "Hoofdtoneel",
+                        "08.00 - 12.30 Opbouwen/voorbereiden",
+                        "13.30 - 16.30 Orkesttoneelrepetitie + chorus 1",
+                        "18.30 - 21.30 Orkesttoneelrepetitie + chorus 2",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        rehearsals = [
+            item for item in schedule.items if item.activity.startswith("Orkesttoneel")
+        ]
+        self.assertEqual(
+            [item.avm_call_time.strftime("%H:%M") for item in rehearsals],
+            ["11:00", "15:30"],
+        )
+        for position in ("AVM1", "AVM2"):
+            shift = plan_daily_shifts(schedule, position, rules)[0]
+            self.assertEqual(shift.start.strftime("%H:%M"), "11:00")
 
     def test_zit_and_sitzprobe_use_otr_staffing_call_time_code_and_priority(self):
         schedule = parse_page_texts(

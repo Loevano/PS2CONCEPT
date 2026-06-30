@@ -307,16 +307,32 @@ def _apply_planning_level(item, rule: dict) -> None:
 
 
 def _call_time_excluding_breaks(
-    schedule: ProductionSchedule, item, working_minutes: int, break_minutes: dict
+    schedule: ProductionSchedule,
+    item,
+    working_minutes: int,
+    break_minutes: dict,
+    assumed_breaks: list[dict[str, Any]] | None = None,
 ) -> datetime:
     call_time = item.start - timedelta(minutes=working_minutes)
     applicable_breaks = []
+    explicit_break_names = set()
     for candidate in schedule.items:
         if candidate.day != item.day or candidate.kind != "pauze":
             continue
-        duration = break_minutes.get(candidate.activity.casefold())
+        break_name = candidate.activity.casefold()
+        duration = break_minutes.get(break_name)
         if duration is not None:
             applicable_breaks.append((candidate.start, int(duration)))
+            explicit_break_names.add(break_name)
+
+    for assumed_break in assumed_breaks or []:
+        break_name = str(assumed_break["activity"]).casefold()
+        if break_name in explicit_break_names:
+            continue
+        break_start = datetime.combine(
+            item.day, _parse_clock(str(assumed_break["start"]))
+        )
+        applicable_breaks.append((break_start, int(assumed_break["minutes"])))
 
     included = set()
     changed = True
@@ -492,6 +508,7 @@ def apply_avm_rules(
                             "excluded_break_minutes", {}
                         ).items()
                     },
+                    list(call_rule.get("assumed_breaks", [])),
                 )
             elif "minutes_before" in call_rule:
                 item.avm_call_time = item.start - timedelta(

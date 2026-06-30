@@ -400,10 +400,33 @@
       }
     },
     {
-      "id": "otr-zit-vgo-pvg-or-twee-gewerkte-uren-vooraf",
-      "description": "Voor OTR, ZIT, VGO, PVG en een orkestrepetitie is AVM minimaal twee gewerkte uren voor aanvang aanwezig; lunch- en dinerpauzes tellen niet mee.",
+      "id": "otr-twee-gewerkte-uren-vooraf",
+      "description": "Voor een OTR is AVM minimaal twee gewerkte uren voor aanvang aanwezig. Als de bron geen pauze vermeldt, wordt uitgegaan van de standaard lunch- en dinerpauze.",
       "activity_patterns": [
-        "^orkest\\s*toneelrepetitie(?:\\s+.*)?$",
+        "^orkest\\s*toneelrepetitie(?:\\s+.*)?$"
+      ],
+      "working_minutes_before": 120,
+      "excluded_break_minutes": {
+        "lunchpauze": 30,
+        "dinerpauze": 60
+      },
+      "assumed_breaks": [
+        {
+          "activity": "lunchpauze",
+          "start": "12:30",
+          "minutes": 30
+        },
+        {
+          "activity": "dinerpauze",
+          "start": "17:30",
+          "minutes": 60
+        }
+      ]
+    },
+    {
+      "id": "zit-vgo-pvg-or-twee-gewerkte-uren-vooraf",
+      "description": "Voor ZIT, VGO, PVG en een orkestrepetitie is AVM minimaal twee gewerkte uren voor aanvang aanwezig; lunch- en dinerpauzes tellen niet mee.",
+      "activity_patterns": [
         "^orkestrepetitie(?:\\s+.*)?$",
         "^(?:zit|sitzprobe)(?:\\s+.*)?$",
         "^(?:piano\\s+)?voorgenerale(?:\\s+.*)?$"
