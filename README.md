@@ -86,104 +86,80 @@ python3 -m venv .venv
 
 ## Huidige afbakening
 
-- Activiteiten, datums, tijden, locaties en toelichtingen worden uit het
-  productieschema gelezen.
-- Zowel de Nederlandse als de Engelse NO&B-PDF-structuur wordt herkend.
-  Engelstalige metadata, weekdagen, maanden, locaties en vaste
-  activiteitstermen worden bij extractie naar dezelfde interne begrippen
-  genormaliseerd als de Nederlandstalige planning.
-- Eindtijden na middernacht krijgen automatisch de volgende kalenderdatum.
-- De reguliere AVM-roosterperiode begint op de dag van de eerste activiteit op
-  het Hoofdtoneel. Proefbouw, OT, de opera-presentatie van cast en huis, de
-  grote DNO-studiorepetitie, voorwaardelijk Montagehalwerk en expliciete
-  DNO-voorbereidingsactiviteiten zijn vroege uitzonderingen.
-- Proefbouw en OT worden aan AVM1 toegewezen. Voor een proefbouw wordt geen
-  extra opbouw- of afbouwtijd ingepland. OT-beschikbaarheid blijft als
-  handmatig controlepunt bij het event staan.
-- Alleen bij DNO-opera wordt de presentatie van cast en huis aan AVM1
-  toegewezen. Een conflict wordt geflagd en niet stilzwijgend vervangen.
-- Studiorepetities worden niet geroosterd. Reguliere repetities van een
-  HNB-balletproductie worden niet geroosterd. Op het Hoofdtoneel zijn CD-, SR-,
-  OR-, orkesttoneel-, pianotoneel- en generale repetities expliciete
-  uitzonderingen. In de Grote Studio is bij deze repetities geen AVM nodig;
-  de grote studiorepetitie van DNO blijft een afzonderlijke uitzondering.
-- Activiteiten in de Operastudio's en in Het Concertgebouw worden niet voor
-  AVM geroosterd, ongeacht het activiteitstype.
-- Bij DNO is opbouwen/voorbereiden voor belichten alleen op de eerste
-  bijbehorende dag op het Hoofdtoneel een voorbereidingsmoment voor AVM1 met
-  planniveau `gebruikelijk`. Alleen wanneer decorinbouw is bevestigd, worden
-  AVM1 en AVM2 geroosterd.
-- Bij een DNO-productie vraagt de planner of er iets in het decor moet worden
-  ingebouwd. Bij `ja` moet een Montagehalmoment bestaan of via een
-  antwoordenbestand van datum en tijd worden voorzien. Zonder antwoord blijft
-  het rooster `invoer_nodig`.
-- Licht richten en technische tijd worden niet geroosterd. Oplevering van het
-  decor is een richtlijn: inplannen zolang dit zonder CAO-conflict kan.
-- Belichten vereist precies één AVM'er, aanwezig vanaf minimaal 30 minuten voor
-  aanvang. Een regierepetitie op het Hoofdtoneel vereist AVM1 en AVM2, beiden
-  vanaf minimaal twee uur vooraf.
-- Piano CD vereist AVM1 en AVM2, maar is bij conflictoplossing een vroege
-  kandidaat voor TEAM-AVM-overname.
-- De huidige bedrijfsregels vereisen twee AVM'ers bij iedere voorstelling
-  (inclusief schoolvoorstelling), alle generales en orkest-gerelateerde
-  repetities zoals orkestrepetitie, orkesttoneelrepetitie en voorgenerale orkest.
-- Bij OTR, ZIT (Zit/Sitzprobe), VGO en PVG zijn de AVM'ers minimaal twee gewerkte uren voor aanvang
-  aanwezig; lunch- en dinerpauzes tellen niet mee.
-- HNB-pianotoneelrepetities staan bij voorkeur met twee AVM'ers, maar kunnen
-  bij CAO-druk per situatie naar TEAM-AVM worden verplaatst.
-- Bij een VGO of PVG begint de AVM-dienst minimaal twee gewerkte uren voor
-  aanvang, exclusief pauzes. Bij
-  overstaan wordt 30 minuten afbouwtijd ingepland; bij niet overstaan 60
-  minuten. Daarna kan de algemene achturige streeftijdaanvulling worden
-  toegepast.
-- Technische repetities vereisen minimaal één AVM'er met voorkeur voor AVM 1.
-- HNB-cd-toneelrepetities en belichten vereisen één AVM'er en mogen door een
-  TEAM-AVM worden gedaan.
-- Er staat maximaal één AVM'er tegelijk op belichten; de planner verdeelt
-  belichten flexibel over AVM 1, AVM 2 en TEAM-AVM bij CAO-druk.
-- Bij een CAO-conflict worden eerst belichten en HNB-cd-toneelrepetities naar
-  een TEAM-AVM verplaatst, samen met Piano CD; daarna volgen
-  HNB-pianotoneelrepetities. Als dat niet genoeg is, mogen ook andere verplichte
-  AVM-activiteiten naar TEAM-AVM om dienstduur en rusttijd op te lossen.
-- Een langere dienst voor AVM1 of AVM2 heeft altijd voorrang op TEAM-AVM zolang
-  de werkdag maximaal 13,5 uur duurt (inclusief 30 minuten lunchpauze en 60
-  minuten dinerpauze) en minimaal elf uur rust behouden blijft.
-- Verplichte activiteiten blijven gedekt. Een voorkeur voor AVM1/AVM2 mag bij
-  CAO-druk door TEAM-AVM worden overgenomen; activiteitprioriteit en
-  persoonsvoorkeur zijn afzonderlijke beslissingen.
-- Zit/Sitzprobe heeft code `ZIT` en dezelfde dubbele bezetting en
-  vervangingsprioriteit als OTR.
-- Orkestrepetities op het Hoofdtoneel en solistenrepetities vereisen twee
-  AVM'ers: AVM 1 en AVM 2.
-- Bij voorstellingen en schoolvoorstellingen geldt een minimale
-  aanwezigheidstijd van twee gewerkte uren vóór aanvang. Lunchpauze (30
-  minuten) en dinerpauze (60 minuten) tellen daarbij niet mee. De planner kan
-  eerder beginnen om de streefduur van acht uur te halen.
-- Een schoolvoorstelling om 13:30 met een lunchpauze in de aanlooptijd begint
-  daarom om 11:00.
-- Op dagen met twee voorstellingen draaien AVM1 en AVM2 beide voorstellingen.
-  Als de normale aanwezigheid langer dan 13,5 uur zou duren, wordt de
-  voorbereiding vóór de eerste voorstelling ingekort en worden de laatste
-  13,5 uur van de dag geroosterd.
-- Een berekende AVM-dienststart van exact 12:00 wordt normaal naar 11:30
-  vervroegd. Deze correctie vervalt wanneer de werkdag daardoor langer dan
-  13,5 uur wordt. De activiteitstijd uit de bron-PDF
-  blijft ongewijzigd.
-- AVM-diensttijden worden naar buiten afgerond op halve uren: de start naar
-  beneden en het einde naar boven. Daarna probeert de planner de streefduur
-  binnen de ingestelde tijd- en CAO-grenzen te behalen.
-- Het tekstrooster bevat een kolom `Overstaan`. Deze krijgt een `x` wanneer de
-  dag met `Afsluiten` of `Afsluiting` eindigt; bij `Afbouw` blijft zij leeg.
-- Mogelijke aanvullende gevallen zoals `video`, `geluid` en `soundcheck`
-  krijgen de status `controleren`.
-- Activiteiten voor het richten van licht zijn expliciet uitgesloten van AVM.
-- Een losse AVM-notitie waarvan de relatie door de PDF-opmaak niet eenduidig is,
-  wordt als aparte bronannotatie bewaard.
-- CAO-controle binnen dit productierooster controleert dienstduur en rust tussen
-  opeenvolgende diensten. Week- en vierwekentotalen vereisen nog een volledig
-  persoonlijk rooster met contractomvang.
-- Een conflict met een reeds controleerbare CAO-regel geeft de status
-  `ongeldig_cao`. Zo'n uitvoer is alleen diagnostisch en nooit definitief.
+De planner doet op dit moment het volgende:
+
+- Leest activiteiten, datums, tijden, locaties en toelichtingen uit Nederlandse
+  en Engelse NO&B-planningen.
+- Zet Engelse termen automatisch om naar dezelfde interne begrippen als de
+  Nederlandse planning.
+- Zet een eindtijd na middernacht op de volgende kalenderdag.
+
+**Wat valt binnen het rooster?**
+
+- De reguliere periode start bij de eerste activiteit op het Hoofdtoneel.
+  Proefbouw, OT, cast-en-huispresentatie, de grote DNO-studiorepetitie,
+  Montagehalwerk en DNO-voorbereiding kunnen eerder vallen.
+- Studiorepetities en reguliere HNB-repetities worden niet geroosterd.
+  Uitzonderingen op het Hoofdtoneel zijn CD, SR, OR, OTR, PTR en generale.
+- In de Grote Studio is voor deze repetities geen AVM nodig. De grote
+  DNO-studiorepetitie is de uitzondering.
+- Activiteiten in de Operastudio's en Het Concertgebouw vallen buiten het
+  AVM-rooster.
+- Licht richten en technische tijd worden niet geroosterd.
+- Onduidelijke gevallen zoals `video`, `geluid` en `soundcheck` krijgen
+  `controleren`.
+
+**DNO-afspraken**
+
+- Proefbouw en OT gaan naar AVM1. Proefbouw heeft geen extra op- of afbouwtijd;
+  bij OT wordt de beschikbaarheid handmatig gecontroleerd.
+- Cast-en-huispresentatie gaat alleen bij DNO naar AVM1. Conflicten worden
+  zichtbaar gemeld.
+- Voorbereiden voor belichten telt alleen op de eerste bijbehorende
+  Hoofdtoneeldag. Normaal staat daar AVM1; bij bevestigde decorinbouw ook AVM2.
+- De planner vraagt of decorinbouw nodig is. Bij `ja` is een Montagehalmoment
+  met datum en tijd nodig. Zonder antwoord blijft de status `invoer_nodig`.
+- Oplevering decor is een richtlijn en wordt alleen ingepland als dat zonder
+  CAO-conflict past.
+
+**Bezetting en tijden**
+
+- Voorstellingen, schoolvoorstellingen, generales, OR, OTR, VGO en PVG hebben
+  twee AVM'ers nodig. ZIT heeft dezelfde bezetting en prioriteit als OTR.
+- RR op het Hoofdtoneel heeft AVM1 en AVM2 nodig, vanaf twee uur voor aanvang.
+- OR op het Hoofdtoneel en SR hebben AVM1 en AVM2 nodig.
+- Technische repetitie heeft minimaal één AVM'er, bij voorkeur AVM1.
+- Belichten heeft precies één AVM'er, vanaf 30 minuten voor aanvang. De planner
+  kiest flexibel uit AVM1, AVM2 en TEAM-AVM.
+- Piano CD heeft AVM1 en AVM2 nodig. PTR staat bij voorkeur met twee AVM'ers.
+- CD-toneel en belichten mogen bij CAO-druk naar TEAM-AVM.
+- Bij OTR, ZIT, VGO, PVG en (school)voorstellingen geldt minimaal twee gewerkte
+  uren voorbereiding. Lunch (30 min) en diner (60 min) tellen daarin niet mee.
+- VGO/PVG krijgt na afloop 30 minuten bij overstaan en anders 60 minuten.
+- Een schoolvoorstelling om 13:30 met lunch in de voorbereiding begint daarom
+  om 11:00.
+- Bij twee voorstellingen draaien AVM1 en AVM2 beide shows. Boven 13,5 uur
+  wordt de voorbereiding ingekort tot de laatste 13,5 uur van de dag.
+
+**Conflicten en afronding**
+
+- Bij CAO-druk gaan Piano CD, belichten en CD-toneel als eerste naar TEAM-AVM,
+  daarna PTR. Andere verplichte events volgen alleen als dat nodig is.
+- Een langere dienst bij AVM1/AVM2 gaat vóór TEAM-AVM zolang de dienst inclusief
+  pauzes maximaal 13,5 uur duurt en er minimaal elf uur rust overblijft.
+- Verplichte activiteiten blijven altijd gedekt. Een personeelsvoorkeur mag
+  wel worden vervangen.
+- Een berekende start om 12:00 wordt normaal 11:30, tenzij de dienst daardoor
+  langer dan 13,5 uur wordt. De activiteitstijd uit de PDF verandert niet.
+- Diensttijden worden naar buiten afgerond op halve uren. Daarna probeert de
+  planner de streefduur van acht uur te halen binnen de CAO-grenzen.
+- `Overstaan` krijgt een `x` bij `Afsluiten` of `Afsluiting`, maar niet bij
+  `Afbouw`.
+- Losse, onduidelijk gekoppelde AVM-notities blijven als bronannotatie bewaard.
+- De CAO-controle kijkt naar dienstduur en rust tussen diensten. Week- en
+  vierwekentotalen vereisen nog een volledig persoonlijk rooster.
+- Een controleerbaar CAO-conflict krijgt `ongeldig_cao`. Die uitvoer is alleen
+  bedoeld voor diagnose, niet als definitief rooster.
 
 ## Planniveaus en conditionele invoer
 
@@ -262,20 +238,28 @@ specifieke dienst mag zijn eigen eindtijd houden, bijvoorbeeld zondag
 
 Voor iedere activiteit stelt de planner deze vragen:
 
-1. **Valt het vóór de reguliere AVM-periode?**
-   - De periode begint op de dag van de eerste Hoofdtoneel-activiteit.
-   - Proefbouw, OT, cast-en-huispresentatie, grote DNO-studiorepetitie,
-     voorbereiden/belichten, oplevering decor en Montagehalwerk zijn
-     geconfigureerde vroege uitzonderingen.
-   - Geen uitzondering: stop met reden `Buiten AVM-roosterperiode`.
-2. **Past een uitsluiting?** De eerste passende uitsluiting wint:
-   - Operastudio's en Het Concertgebouw;
-   - technische tijd;
-   - licht richten;
-   - reguliere HNB-balletrepetities, behalve de benoemde uitzonderingen;
-   - repetities in een studio/Grote Studio, behalve de grote
-     DNO-studiorepetitie.
-   - Bij een match: stop met reden `Geen AVM volgens uitsluiting`.
+1. **Valt de activiteit vóór de eerste Hoofdtoneeldag?**
+   - Dan is geen AVM nodig, tenzij het gaat om:
+     - proefbouw;
+     - OT;
+     - cast-en-huispresentatie;
+     - de grote DNO-studiorepetitie;
+     - voorbereiden voor belichten;
+     - oplevering decor;
+     - Montagehalwerk.
+   - Valt de activiteit onder een uitzondering, dan gaat de beoordeling
+     verder. Anders stopt deze met de reden `Buiten AVM-roosterperiode`.
+2. **Wanneer is geen AVM nodig?**
+   - Als de activiteit in een Operastudio of Het Concertgebouw plaatsvindt.
+   - Als het om technische tijd gaat.
+   - Als het om licht richten gaat.
+   - Als het een reguliere HNB-balletrepetitie is en niet onder een benoemde
+     uitzondering valt.
+   - Als het een repetitie in een studio of de Grote Studio is, behalve de
+     grote DNO-studiorepetitie.
+   - Zodra één van deze situaties geldt, stopt de beoordeling met de reden
+     `Geen AVM volgens uitsluiting`. Anders gaat de planner verder met de
+     bezettingsregels.
 3. **Pas alle passende bezettingsregels toe.**
    - Vragen meerdere regels om bezetting, dan blijft het hoogste aantal staan.
    - Planniveau, maximumbezetting, voorkeurspositie, standaardpositie en
@@ -310,31 +294,33 @@ Voor iedere activiteit stelt de planner deze vragen:
    - Een losse, niet eenduidig gekoppelde `AVM`-annotatie wordt
      `controleren`.
 
-De actieve bezettings- en aanwezigheidsregels zijn:
+De actieve bezettings- en aanwezigheidsregels zijn hieronder gesorteerd op de
+prioriteit van de roosterafkortingen. Activiteiten zonder roosterafkorting
+staan onderaan.
 
 | Activiteit/geval | Bezetting | Minuten vóór aanvang | Minuten na afloop | Niveau/bijzonderheid |
 |---|---:|---:|---:|---|
-| Proefbouw | AVM1 | 0 | 0 | verplicht |
-| OT/ontwerpteam | AVM1 | 0 | 0 | verplicht, vergadering; verhindering controleren |
-| DNO cast-en-huispresentatie | AVM1 | 0 | 0 | verplicht |
-| DNO voorbereiden belichten, eerste Hoofdtoneeldag | AVM1 | 30 | 30 | gebruikelijk, gelijk aan belichten |
-| Zelfde, decorinbouw bevestigd | AVM1 + AVM2 | 30 | 30 | verplicht, gelijk aan belichten |
-| Grote DNO-studiorepetitie | AVM1 | 60 | 60 | verplicht |
-| DNO Montagehal/decorinbouw | AVM1 | 0 | 0 | verplicht |
-| Oplevering decor | één flexibele AVM | 0 | 0 | richtlijn |
-| RR op Hoofdtoneel | AVM1 + AVM2 | 120 | 60 | verplicht |
-| Piano CD | AVM1 + AVM2 | 60 | 30 | verplicht, lage TEAM-prioriteit |
 | Voorstelling/schoolvoorstelling | AVM1 + AVM2 | 120 gewerkte minuten¹ | 60 | verplicht |
 | Generale | AVM1 + AVM2 | 270 | 60 | verplicht |
 | VGO/PVG | AVM1 + AVM2 | 120 gewerkte minuten¹ | 30 bij overstaan, anders 60 | verplicht |
 | OTR | AVM1 + AVM2 | 120 gewerkte minuten¹ | 60 | verplicht |
 | Zit/Sitzprobe (`ZIT`) | AVM1 + AVM2 | 120 gewerkte minuten¹ | 60 | verplicht |
-| Pianotoneelrepetitie | AVM1 + AVM2 | 60 | 30 | verplicht |
+| Orkestrepetitie op Hoofdtoneel | AVM1 + AVM2 | 60 | 60 | verplicht |
+| RR op Hoofdtoneel | AVM1 + AVM2 | 120 | 60 | verplicht |
 | Technische repetitie | één AVM, voorkeur AVM1 | 60 | 60 | verplicht |
+| Pianotoneelrepetitie | AVM1 + AVM2 | 60 | 30 | verplicht |
+| Solistenrepetitie | AVM1 + AVM2 | 30 | 30 | verplicht |
 | CD-toneelrepetitie | één flexibele AVM | 60 | 30 | verplicht |
 | Belichten | exact één flexibele AVM | 30 | 30 | verplicht |
-| Orkestrepetitie op Hoofdtoneel | AVM1 + AVM2 | 60 | 60 | verplicht |
-| Solistenrepetitie | AVM1 + AVM2 | 30 | 30 | verplicht |
+| DNO voorbereiden belichten, eerste Hoofdtoneeldag | AVM1 | 30 | 30 | gebruikelijk, gelijk aan belichten |
+| Zelfde, decorinbouw bevestigd | AVM1 + AVM2 | 30 | 30 | verplicht, gelijk aan belichten |
+| Proefbouw | AVM1 | 0 | 0 | verplicht |
+| DNO cast-en-huispresentatie | AVM1 | 0 | 0 | verplicht |
+| OT/ontwerpteam | AVM1 | 0 | 0 | verplicht, vergadering; verhindering controleren |
+| Grote DNO-studiorepetitie | AVM1 | 60 | 60 | verplicht |
+| DNO Montagehal/decorinbouw | AVM1 | 0 | 0 | verplicht |
+| Oplevering decor | één flexibele AVM | 0 | 0 | richtlijn |
+| Piano CD | AVM1 + AVM2 | 60 | 30 | verplicht, lage TEAM-prioriteit |
 
 ¹ Lunch- en dinerpauzes tellen niet mee in de minuten vóór aanvang.
 
