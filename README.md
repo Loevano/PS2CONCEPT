@@ -285,10 +285,23 @@ Voor iedere activiteit stelt de planner deze vragen:
    - Deze stap bestaat in de planner, maar
      `location_staffing_rules` is momenteel leeg.
 5. **Bereken de oproeptijd.**
-   - Een regel met gewerkte minuten loopt terug vanaf aanvang en telt
-     geconfigureerde lunch-/dinerpauzes niet als werktijd.
-   - Een regel met gewone minuten trekt die rechtstreeks van de aanvang af.
-   - Een berekende oproeptijd van exact 12:00 wordt naar 11:30 gecorrigeerd.
+
+   ```text
+   gewone minuten:
+   oproeptijd = aanvang - minuten vooraf
+
+   gewerkte minuten:
+   oproeptijd = aanvang - gewerkte minuten - pauzes in dit tijdvak
+   ```
+
+   Voorbeelden:
+   - Belichten begint om 14:00 en vraagt 30 gewone minuten voorbereiding:
+     `14:00 - 00:30 = 13:30`.
+   - Een voorstelling begint om 13:30 en vraagt 120 gewerkte minuten. Valt
+     daar een lunchpauze van 30 minuten tussen, dan wordt het
+     `13:30 - 02:00 - 00:30 = 11:00`.
+   - Komt de uitkomst precies op 12:00, dan maakt de planner daar 11:30 van.
+     Een RR om 14:00 wordt dus `14:00 - 02:00 = 12:00 → 11:30`.
 6. **Bepaal de status.**
    - Bezetting gevonden: status volgt het planniveau.
    - Anders een expliciete vereiste tekstmatch: één verplichte AVM.
