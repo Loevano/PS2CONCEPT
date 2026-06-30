@@ -29,6 +29,9 @@ class PlanningItem:
     avm_default_position: Optional[str] = None
     avm_flexible_positions: list[str] = field(default_factory=list)
     avm_call_time: Optional[datetime] = None
+    avm_single_preparer: bool = False
+    avm_single_closer: bool = False
+    avm_closing_required: Optional[bool] = None
     avm_day_wrap_minutes: Optional[int] = None
     avm_planning_level: Optional[str] = None
     avm_assignment_status: Optional[str] = None

@@ -97,6 +97,8 @@ PLANNING_PERIOD_RE = re.compile(
 LOCATION_PATTERNS = (
     (r"Main Stage", "Hoofdtoneel"),
     (r"Hoofdtoneel", "Hoofdtoneel"),
+    (r"Studio Boekman", "Studio Boekman"),
+    (r"Studio Decoratelier", "Studio Decoratelier"),
     (r"Grote Studio", "Grote Studio"),
     (r"Operastudio(?:\s+\d+)?", None),
     (r"STUDIO EXTERN,?", None),
@@ -118,6 +120,15 @@ LOCATION_PATTERNS = (
     (r"Studio", None),
 )
 
+UNKNOWN_LOCATION_RE = re.compile(
+    r"^(?:(?P<prefix>.+?)\s+)?"
+    r"(?P<location>"
+    r"[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÿ'’.-]*"
+    r"(?:\s+(?:[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÿ'’.-]*|de|het|aan|van|den|der))*"
+    r",\s*(?:'s-?)?[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÿ'’.-]*(?:\s+[A-Za-zÀ-ÿ'’.-]+)*"
+    r")$"
+)
+
 PRODUCTION_TITLE_RE = re.compile(
     r"^(?:HNB|DNO)\s+\d+(?:\s+-)?\s+.+$",
     re.IGNORECASE,
@@ -126,7 +137,8 @@ PRODUCTION_TITLE_RE = re.compile(
 ACTIVITY_TRANSLATIONS = (
     (r"Final dress rehearsal", "Generale repetitie"),
     (r"Orchestra dress rehearsal", "Voorgenerale orkest"),
-    (r"Piano dress rehearsal", "Piano toneelrepetitie"),
+    (r"Piano dress rehearsal", "Piano voorgenerale"),
+    (r"Piano\s*/\s*cd stage\s*rehearsal", "Piano/cd toneelrepetitie"),
     (r"Piano stage\s*rehearsal", "Piano toneelrepetitie"),
     (r"Cd stage\s*rehearsal", "Cd toneelrepetitie"),
     (r"Stage and orchestra rehearsal", "Orkesttoneelrepetitie"),
@@ -218,14 +230,70 @@ def _split_trailing_location(value: str) -> tuple[str, str | None]:
         if pattern == r"Studio":
             continue
         match = re.search(
-            rf"^(?P<activity>.+?)\s+(?P<location>{pattern})$",
+            rf"^(?P<activity>.+?)\s+(?P<location>{pattern})"
+            rf"(?:\s+Not Available:)?$",
             value,
             flags=re.IGNORECASE,
         )
         if match:
             location = canonical or match.group("location").rstrip(",")
             return match.group("activity").strip(), location
+    unknown_match = UNKNOWN_LOCATION_RE.match(value)
+    if unknown_match and unknown_match.group("prefix"):
+        return (
+            unknown_match.group("prefix").strip(),
+            unknown_match.group("location").strip(),
+        )
     return value, None
+
+
+def _recover_unknown_location(item: PlanningItem) -> None:
+    if item.location is not None:
+        return
+    for index, detail in enumerate(item.details):
+        match = UNKNOWN_LOCATION_RE.match(detail)
+        location = match.group("location").strip() if match else None
+        prefix = match.group("prefix").strip() if match and match.group("prefix") else None
+        consumed = {index}
+
+        if location is None and detail.rstrip().endswith(","):
+            if index + 1 >= len(item.details):
+                continue
+            location = f"{detail.rstrip()} {item.details[index + 1].strip()}"
+            consumed.add(index + 1)
+        elif location is None and "," in detail and detail.rstrip().endswith("-"):
+            if index + 1 >= len(item.details):
+                continue
+            location = detail.rstrip() + item.details[index + 1].strip()
+            consumed.add(index + 1)
+        elif location is not None and location.rstrip().endswith("-"):
+            if index + 1 < len(item.details):
+                location += item.details[index + 1].strip()
+                consumed.add(index + 1)
+
+        if location is None:
+            continue
+
+        if index > 0 and re.match(
+            r"^(?:Theater|Stadsschouwburg)\b",
+            item.details[index - 1],
+            flags=re.IGNORECASE,
+        ):
+            location = f"{item.details[index - 1].strip()} {location}"
+            consumed.add(index - 1)
+
+        item.location = re.sub(r"\s+,", ",", location)
+        remaining_details = [
+            value for detail_index, value in enumerate(item.details)
+            if detail_index not in consumed
+        ]
+        if prefix:
+            remaining_details.insert(
+                min(index, len(remaining_details)),
+                prefix,
+            )
+        item.details = remaining_details
+        return
 
 
 def _normalise_activity(value: str) -> str:
@@ -390,6 +458,16 @@ def parse_page_texts(page_texts: Iterable[str], source_file: str = "<memory>") -
             "Losse AVM-bronannotaties zijn niet automatisch aan een activiteit toegewezen; "
             "controleer de PDF-opmaak."
         )
+    for item in items:
+        _recover_unknown_location(item)
+    for item, continuation in zip(items, items[1:]):
+        if (
+            item.location is None
+            and continuation.day == item.day
+            and continuation.location is not None
+            and continuation.activity.lstrip().startswith("&")
+        ):
+            item.location = continuation.location
 
     return ProductionSchedule(
         source_file=source_file,

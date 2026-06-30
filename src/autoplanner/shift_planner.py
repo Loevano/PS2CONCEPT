@@ -81,6 +81,9 @@ def _activity_buffer_minutes(
         after = int(rule.get("after_minutes", after))
         preserve_after = bool(rule.get("preserve_after_minutes", False))
         break
+    if item.avm_closing_required is False:
+        after = 0
+        preserve_after = True
     return before, after, preserve_after
 
 
@@ -218,6 +221,46 @@ def _double_performance_rule(
     return rule if matching_count >= int(rule.get("minimum_count", 2)) else None
 
 
+def _required_start_for_rest(
+    items: list[PlanningItem], shift_rules: dict
+) -> datetime:
+    required_start, _, _ = _required_window(items, shift_rules)
+    for rule in shift_rules.get("special_shift_rules", []):
+        if not rule.get("start_may_shift_for_rest_to_required_call_time"):
+            continue
+        patterns = [str(pattern) for pattern in rule.get("activity_patterns", [])]
+        matching = [
+            item
+            for item in items
+            if patterns and _matches_patterns(item.activity, patterns)
+        ]
+        if not matching:
+            continue
+        weekdays = [int(value) for value in rule.get("weekdays", [])]
+        if weekdays and not any(item.day.weekday() in weekdays for item in matching):
+            continue
+        activity_start = rule.get("activity_start")
+        if activity_start and not any(
+            item.start.strftime("%H:%M") == str(activity_start)
+            for item in matching
+        ):
+            continue
+        maximum_matching = rule.get("maximum_matching_activities")
+        if maximum_matching is not None and len(matching) > int(maximum_matching):
+            continue
+
+        mandatory_starts = []
+        for item in items:
+            before, _, _ = _activity_buffer_minutes(item, shift_rules)
+            mandatory_starts.append(
+                item.avm_call_time
+                if item.avm_call_time is not None
+                else item.start - timedelta(minutes=before)
+            )
+        return min(mandatory_starts)
+    return required_start
+
+
 def _planned_bounds(
     items: list[PlanningItem], shift_rules: dict
 ) -> tuple[datetime, datetime, int]:
@@ -329,6 +372,40 @@ def _split_flexible_item(item: PlanningItem) -> tuple[PlanningItem, PlanningItem
     return first, second
 
 
+def _two_person_role_copies(
+    item: PlanningItem,
+    preparer: str | None,
+    closer: str | None,
+) -> dict[str, PlanningItem]:
+    copies: dict[str, PlanningItem] = {}
+    for position in ("AVM1", "AVM2"):
+        is_preparer = preparer is None or position == preparer
+        is_closer = closer is None or position == closer
+        role_reasons = []
+        if preparer is not None:
+            role_reasons.append(
+                f"Voorbereidingsverdeling: {position} doet de vroege voorbereiding"
+                if is_preparer
+                else (
+                    f"Voorbereidingsverdeling: {position} is vanaf aanvang aanwezig; "
+                    f"{preparer} doet de vroege voorbereiding"
+                )
+            )
+        if closer is not None:
+            role_reasons.append(
+                f"Afsluitverdeling: {position} doet de afsluiting"
+                if is_closer
+                else f"Afsluitverdeling: {closer} doet de afsluiting"
+            )
+        copies[position] = replace(
+            item,
+            avm_call_time=item.avm_call_time if is_preparer else item.start,
+            avm_closing_required=is_closer if closer is not None else None,
+            avm_reasons=[*item.avm_reasons, *role_reasons],
+        )
+    return copies
+
+
 def build_assignments(
     schedule: ProductionSchedule, rules: dict | None = None
 ) -> dict[str, list[PlanningItem]]:
@@ -338,6 +415,8 @@ def build_assignments(
     flexible = []
     optional = []
     soft = []
+    preparation_counts = {"AVM1": 0, "AVM2": 0}
+    closing_counts = {"AVM1": 0, "AVM2": 0}
 
     for item in schedule.items:
         item.avm_assignment_status = None
@@ -346,8 +425,61 @@ def build_assignments(
             soft.append(item)
             continue
         if item.avm_required_count >= 2:
-            assignments["AVM1"].append(item)
-            assignments["AVM2"].append(item)
+            if item.avm_single_preparer or item.avm_single_closer:
+                preparer = None
+                closer = None
+            if item.avm_single_preparer:
+                least_preparations = min(preparation_counts.values())
+                candidates = [
+                    position
+                    for position in ("AVM1", "AVM2")
+                    if preparation_counts[position] == least_preparations
+                ]
+
+                def preparation_score(position: str):
+                    copies = _two_person_role_copies(item, position, None)
+                    scores = [
+                        _assignment_score(
+                            _items_on_day(assignments[candidate], item.day)
+                            + [copies[candidate]],
+                            rules,
+                        )
+                        for candidate in ("AVM1", "AVM2")
+                    ]
+                    return max(scores), position
+
+                preparer = min(candidates, key=preparation_score)
+                preparation_counts[preparer] += 1
+            if item.avm_single_closer:
+                least_closings = min(closing_counts.values())
+                candidates = [
+                    position
+                    for position in ("AVM1", "AVM2")
+                    if closing_counts[position] == least_closings
+                ]
+
+                def closing_score(position: str):
+                    copies = _two_person_role_copies(item, preparer, position)
+                    scores = [
+                        _assignment_score(
+                            _items_on_day(assignments[candidate], item.day)
+                            + [copies[candidate]],
+                            rules,
+                        )
+                        for candidate in ("AVM1", "AVM2")
+                    ]
+                    same_person_penalty = 1 if position == preparer else 0
+                    return max(scores), same_person_penalty, position
+
+                closer = min(candidates, key=closing_score)
+                closing_counts[closer] += 1
+            if item.avm_single_preparer or item.avm_single_closer:
+                copies = _two_person_role_copies(item, preparer, closer)
+                for position in ("AVM1", "AVM2"):
+                    assignments[position].append(copies[position])
+            else:
+                assignments["AVM1"].append(item)
+                assignments["AVM2"].append(item)
             item.avm_assignment_status = "ingepland"
         elif item.avm_optional:
             optional.append(item)
@@ -650,14 +782,49 @@ def _plan_daily_shifts_for_items(
             target_minutes=target_minutes,
         )
         team_reasons = []
+        item_start_corrections = []
+        preparation_notes = []
+        closing_notes = []
         for item in day_items:
+            if item.avm_single_preparer:
+                is_early = (
+                    item.avm_call_time is not None
+                    and item.avm_call_time < item.start
+                )
+                note = (
+                    f"Vroege voorbereiding: {item.activity}"
+                    if is_early
+                    else (
+                        f"Vanaf aanvang aanwezig bij {item.activity}; "
+                        "vroege voorbereiding door andere AVM"
+                    )
+                )
+                if note not in preparation_notes:
+                    preparation_notes.append(note)
+            if item.avm_single_closer:
+                note = (
+                    f"Afsluiting: {item.activity}"
+                    if item.avm_closing_required
+                    else f"Geen afsluiting nodig na {item.activity}; andere AVM sluit af"
+                )
+                if note not in closing_notes:
+                    closing_notes.append(note)
             for reason in item.avm_reasons:
                 if not reason.startswith(TEAM_REASON_PREFIX):
+                    if reason.startswith("Dienststartcorrectie: "):
+                        note = "Startcorrectie: " + reason.removeprefix(
+                            "Dienststartcorrectie: "
+                        )
+                        if note not in item_start_corrections:
+                            item_start_corrections.append(note)
                     continue
                 note = reason.removeprefix(TEAM_REASON_PREFIX)
                 if note not in team_reasons:
                     team_reasons.append(note)
         shift.flags.extend(team_reasons)
+        shift.flags.extend(preparation_notes)
+        shift.flags.extend(closing_notes)
+        shift.flags.extend(item_start_corrections)
         shift.flags.extend(f"Startcorrectie: {reason}" for reason in adjustment_reasons)
         if skipped_adjustment_reasons:
             shift.flags = [
@@ -730,20 +897,15 @@ def _plan_daily_shifts_for_items(
         rest_minutes = int((current.start - previous.end).total_seconds() // 60)
         if rest_minutes < minimum_rest_minutes:
             compliant_start = previous.end + timedelta(minutes=minimum_rest_minutes)
-            required_start, _, _ = _required_window(current.items, shift_rules)
+            required_start = _required_start_for_rest(current.items, shift_rules)
             if compliant_start <= required_start:
                 current.start = compliant_start
                 current.flags.append("Start verschoven om minimaal 11 uur nachtrust te behouden")
-            elif compliant_start <= min(item.start for item in current.items):
-                current.start = compliant_start
-                current.flags.append(
-                    "Start verschoven om minimaal 11 uur nachtrust te behouden; "
-                    "aanloop voor dienststart is niet in deze dienst opgenomen"
-                )
             else:
                 current.flags.append(
                     f"CAO-CONFLICT: {rest_minutes // 60}u{rest_minutes % 60:02d} "
-                    "rust sinds vorige dienst; minimaal 11 uur vereist"
+                    "rust sinds vorige dienst; minimaal 11 uur vereist en de "
+                    "verplichte aanlooptijd mag niet vervallen"
                 )
         fill_to_target(
             current,
@@ -825,10 +987,8 @@ def _cao_conflict_score(shifts: list[DailyShift], rules: dict) -> tuple[int, int
         if rest_minutes >= minimum_rest_minutes:
             continue
         compliant_start = previous.end + timedelta(minutes=minimum_rest_minutes)
-        required_start, _, _ = _required_window(current.items, shift_rules)
-        if compliant_start <= required_start or compliant_start <= min(
-            item.start for item in current.items
-        ):
+        required_start = _required_start_for_rest(current.items, shift_rules)
+        if compliant_start <= required_start:
             continue
         conflicts += 1
         deficit += minimum_rest_minutes - rest_minutes

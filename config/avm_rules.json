@@ -51,9 +51,10 @@
     }
   ],
   "planning_scope": {
-    "description": "De reguliere AVM-roosterperiode begint op de dag van de eerste activiteit op het Hoofdtoneel. De expliciet genoemde vroege uitzonderingen blijven wel in het rooster.",
+    "description": "De reguliere AVM-roosterperiode begint op de dag van de eerste activiteit op een speellocatie: het Hoofdtoneel of Studio Boekman. De expliciet genoemde vroege uitzonderingen blijven wel in het rooster.",
     "start_location_patterns": [
-      "^Hoofdtoneel$"
+      "^Hoofdtoneel$",
+      "^Studio Boekman$"
     ],
     "before_start_activity_patterns": [
       "^proefbouw(?:\\s+.*)?$",
@@ -93,7 +94,7 @@
     },
     {
       "id": "ballet-repetities",
-      "description": "AVM is niet aanwezig bij reguliere repetities van een HNB-balletproductie. Op het Hoofdtoneel zijn regierepetities, zit-/sitzprobes, cd-toneelrepetities, solistenrepetities, orkestrepetities, orkesttoneelrepetities, pianotoneelrepetities en generale repetities expliciete uitzonderingen en worden ze volgens hun eigen bezettingsregels geroosterd.",
+      "description": "AVM is niet aanwezig bij reguliere repetities van een HNB-balletproductie. Op een speellocatie zijn regierepetities, zit-/sitzprobes, cd-toneelrepetities, solistenrepetities, orkestrepetities, orkesttoneelrepetities, pianotoneelrepetities en generale repetities expliciete uitzonderingen en worden ze volgens hun eigen bezettingsregels geroosterd.",
       "production_patterns": [
         "^HNB\\b"
       ],
@@ -103,6 +104,7 @@
       "exclude_activity_patterns": [
         "^regie\\s*repetitie(?:\\s+.*)?$",
         "^(?:zit|sitzprobe)(?:\\s+.*)?$",
+        "^piano\\s*/\\s*cd\\s+toneelrepetitie(?:\\s+.*)?$",
         "^piano\\s+toneelrepetitie(?:\\s+.*)?$",
         "^cd\\s+toneelrepetitie(?:\\s+.*)?$",
         "^solistenrepetitie(?:\\s+.*)?$",
@@ -116,6 +118,9 @@
       "description": "AVM is niet aanwezig bij repetities in een studio of de Grote Studio; de grote studiorepetitie van DNO blijft de expliciete uitzondering.",
       "location_patterns": [
         "^(?:Grote\\s+)?Studio"
+      ],
+      "exclude_location_patterns": [
+        "^Studio Boekman$"
       ],
       "activity_patterns": [
         "repetitie"
@@ -201,7 +206,7 @@
     },
     {
       "id": "dno-voorbereiden-belichten",
-      "description": "Bij DNO is opbouwen/voorbereiden voor belichten alleen op de eerste bijbehorende dag op het Hoofdtoneel een gebruikelijk voorbereidingsmoment voor AVM1; AVM2 wordt toegevoegd als decorinbouw is bevestigd.",
+      "description": "Bij DNO is opbouwen/voorbereiden voor belichten alleen op de eerste bijbehorende dag op een speellocatie een gebruikelijk voorbereidingsmoment voor AVM1; AVM2 wordt toegevoegd als decorinbouw is bevestigd.",
       "production_patterns": [
         "^DNO\\b"
       ],
@@ -209,7 +214,8 @@
         "^(?:opbouwen|voorbereiden|opbouwen/voorbereiden).*\\bbelichten\\b"
       ],
       "location_patterns": [
-        "^Hoofdtoneel$"
+        "^Hoofdtoneel$",
+        "^Studio Boekman$"
       ],
       "only_first_matching_day": true,
       "required_count": 1,
@@ -234,10 +240,11 @@
       ]
     },
     {
-      "id": "regierepetitie-hoofdtoneel",
-      "description": "Een regierepetitie op het Hoofdtoneel vereist AVM1 en AVM2, met aanwezigheid vanaf minimaal twee uur voor aanvang.",
+      "id": "regierepetitie-speellocatie",
+      "description": "Een regierepetitie op het Hoofdtoneel of in Studio Boekman vereist AVM1 en AVM2, met aanwezigheid vanaf minimaal twee uur voor aanvang.",
       "location_patterns": [
-        "^Hoofdtoneel$"
+        "^Hoofdtoneel$",
+        "^Studio Boekman$"
       ],
       "activity_patterns": [
         "^regie\\s*repetitie(?:\\s+.*)?$"
@@ -258,7 +265,7 @@
       "description": "Iedere voorstelling, inclusief schoolvoorstellingen, vereist twee AVM'ers.",
       "activity_patterns": [
         "^voorstelling(?:\\s+\\d+)?$",
-        "^schoolvoorstelling$"
+        "^schoolvoorstelling(?:\\s+\\d+)?$"
       ],
       "required_count": 2
     },
@@ -295,8 +302,16 @@
       "required_count": 2
     },
     {
+      "id": "piano-cd-toneelrepetitie",
+      "description": "Een gecombineerde piano-/cd-toneelrepetitie vereist twee AVM'ers. Eén doet de vroege voorbereiding en één doet de afsluiting; beide rollen worden eerlijk over het project verdeeld.",
+      "activity_patterns": [
+        "^piano\\s*/\\s*cd\\s+toneelrepetitie(?:\\s+.*)?$"
+      ],
+      "required_count": 2
+    },
+    {
       "id": "piano-toneelrepetitie",
-      "description": "Een HNB-pianotoneelrepetitie staat bij voorkeur met twee AVM'ers; bij CAO-druk kan per situatie naar TEAM-AVM worden gekeken.",
+      "description": "Een pianotoneelrepetitie vereist twee AVM'ers. Eén doet de vroege voorbereiding en één doet de afsluiting; beide rollen worden eerlijk over het project verdeeld.",
       "activity_patterns": [
         "^piano\\s+toneelrepetitie(?:\\s+.*)?$"
       ],
@@ -313,15 +328,11 @@
     },
     {
       "id": "cd-toneelrepetitie",
-      "description": "Een HNB-cd-toneelrepetitie vereist één AVM'er en mag door een TEAM-AVM worden gedaan.",
+      "description": "Een cd-toneelrepetitie vereist AVM1 en AVM2. Eén doet de vroege voorbereiding en één doet de afsluiting; beide rollen worden eerlijk over het project verdeeld.",
       "activity_patterns": [
         "^cd\\s+toneelrepetitie(?:\\s+.*)?$"
       ],
-      "required_count": 1,
-      "flexible_positions": [
-        "AVM1",
-        "AVM2"
-      ]
+      "required_count": 2
     },
     {
       "id": "belichten",
@@ -337,10 +348,27 @@
       ]
     },
     {
-      "id": "orkestrepetitie",
-      "description": "Een orkestrepetitie op het Hoofdtoneel vereist twee AVM'ers.",
+      "id": "soundcheck-studio-boekman",
+      "description": "Een soundcheck in Studio Boekman vereist precies één AVM'er.",
       "location_patterns": [
-        "^Hoofdtoneel$"
+        "^Studio Boekman$"
+      ],
+      "activity_patterns": [
+        "^sound\\s*check(?:\\s+.*)?$"
+      ],
+      "required_count": 1,
+      "maximum_count": 1,
+      "flexible_positions": [
+        "AVM1",
+        "AVM2"
+      ]
+    },
+    {
+      "id": "orkestrepetitie",
+      "description": "Een orkestrepetitie op het Hoofdtoneel of in Studio Boekman vereist twee AVM'ers.",
+      "location_patterns": [
+        "^Hoofdtoneel$",
+        "^Studio Boekman$"
       ],
       "activity_patterns": [
         "^orkestrepetitie(?:\\s+.*)?$"
@@ -363,7 +391,7 @@
       "description": "Voor een voorstelling is AVM minimaal twee gewerkte uren voor aanvang aanwezig; lunch- en dinerpauzes tellen niet mee.",
       "activity_patterns": [
         "^voorstelling(?:\\s+\\d+)?$",
-        "^schoolvoorstelling$"
+        "^schoolvoorstelling(?:\\s+\\d+)?$"
       ],
       "working_minutes_before": 120,
       "excluded_break_minutes": {
@@ -372,10 +400,11 @@
       }
     },
     {
-      "id": "otr-zit-vgo-pvg-twee-gewerkte-uren-vooraf",
-      "description": "Voor OTR, ZIT, VGO en PVG is AVM minimaal twee gewerkte uren voor aanvang aanwezig; lunch- en dinerpauzes tellen niet mee.",
+      "id": "otr-zit-vgo-pvg-or-twee-gewerkte-uren-vooraf",
+      "description": "Voor OTR, ZIT, VGO, PVG en een orkestrepetitie is AVM minimaal twee gewerkte uren voor aanvang aanwezig; lunch- en dinerpauzes tellen niet mee.",
       "activity_patterns": [
         "^orkest\\s*toneelrepetitie(?:\\s+.*)?$",
+        "^orkestrepetitie(?:\\s+.*)?$",
         "^(?:zit|sitzprobe)(?:\\s+.*)?$",
         "^(?:piano\\s+)?voorgenerale(?:\\s+.*)?$"
       ],
@@ -386,6 +415,57 @@
       }
     },
     {
+      "id": "generale-twee-gewerkte-uren-vooraf",
+      "description": "Voor een generale repetitie zijn AVM1 en AVM2 minimaal twee gewerkte uren voor aanvang aanwezig; lunch- en dinerpauzes tellen niet mee.",
+      "activity_patterns": [
+        "^generale(?:\\s+repetitie)?$"
+      ],
+      "working_minutes_before": 120,
+      "excluded_break_minutes": {
+        "lunchpauze": 30,
+        "dinerpauze": 60
+      }
+    },
+    {
+      "id": "piano-cd-toneel-een-uur-voorbereiding-door-een-avm",
+      "description": "Voor een gecombineerde piano-/cd-toneelrepetitie doet één van beide AVM'ers vanaf een uur voor aanvang de voorbereiding en doet één AVM'er de afsluiting na afloop. De andere AVM'er is alleen tijdens de repetitie verplicht aanwezig.",
+      "activity_patterns": [
+        "^piano\\s*/\\s*cd\\s+toneelrepetitie(?:\\s+.*)?$"
+      ],
+      "minutes_before": 60,
+      "single_preparer": true,
+      "single_closer": true
+    },
+    {
+      "id": "ptr-een-uur-voorbereiding-door-een-avm",
+      "description": "Voor een pianotoneelrepetitie doet één van beide AVM'ers vanaf een uur voor aanvang de voorbereiding en doet één AVM'er de afsluiting na afloop. De andere AVM'er is alleen tijdens de repetitie verplicht aanwezig.",
+      "activity_patterns": [
+        "^piano\\s+toneelrepetitie(?:\\s+.*)?$"
+      ],
+      "minutes_before": 60,
+      "single_preparer": true,
+      "single_closer": true
+    },
+    {
+      "id": "cd-een-uur-voorbereiding-door-een-avm",
+      "description": "Voor een cd-toneelrepetitie doet één van beide AVM'ers vanaf een uur voor aanvang de voorbereiding en doet één AVM'er de afsluiting na afloop. De andere AVM'er is alleen tijdens de repetitie verplicht aanwezig.",
+      "activity_patterns": [
+        "^cd\\s+toneelrepetitie(?:\\s+.*)?$"
+      ],
+      "minutes_before": 60,
+      "single_preparer": true,
+      "single_closer": true
+    },
+    {
+      "id": "sr-halfuur-voorbereiding-door-een-avm",
+      "description": "Voor een solistenrepetitie doet één van beide AVM'ers vanaf een halfuur voor aanvang de voorbereiding. De andere AVM'er is vanaf de aanvang aanwezig.",
+      "activity_patterns": [
+        "^solistenrepetitie(?:\\s+.*)?$"
+      ],
+      "minutes_before": 30,
+      "single_preparer": true
+    },
+    {
       "id": "belichten-halfuur-vooraf",
       "description": "Voor belichten is één AVM'er minimaal 30 minuten voor aanvang aanwezig.",
       "activity_patterns": [
@@ -394,10 +474,11 @@
       "minutes_before": 30
     },
     {
-      "id": "regierepetitie-hoofdtoneel-twee-uur-vooraf",
-      "description": "Voor een regierepetitie op het Hoofdtoneel zijn AVM1 en AVM2 minimaal twee uur voor aanvang aanwezig.",
+      "id": "regierepetitie-speellocatie-twee-uur-vooraf",
+      "description": "Voor een regierepetitie op het Hoofdtoneel of in Studio Boekman zijn AVM1 en AVM2 minimaal twee uur voor aanvang aanwezig.",
       "location_patterns": [
-        "^Hoofdtoneel$"
+        "^Hoofdtoneel$",
+        "^Studio Boekman$"
       ],
       "activity_patterns": [
         "^regie\\s*repetitie(?:\\s+.*)?$"
@@ -480,10 +561,11 @@
         "after_minutes": 30
       },
       {
-        "id": "orkesttoneelrepetitie-en-zit-twee-uur-vooraf",
-        "description": "Bij een orkesttoneelrepetitie, Zit of Sitzprobe is AVM minimaal twee gewerkte uren voor aanvang aanwezig; pauzes tellen niet mee.",
+        "id": "orkest-en-orkesttoneelrepetitie-en-zit-twee-uur-vooraf",
+        "description": "Bij een orkestrepetitie, orkesttoneelrepetitie, Zit of Sitzprobe is AVM minimaal twee gewerkte uren voor aanvang aanwezig; pauzes tellen niet mee.",
         "activity_patterns": [
           "^orkest\\s*toneelrepetitie(?:\\s+.*)?$",
+          "^orkestrepetitie(?:\\s+.*)?$",
           "^(?:zit|sitzprobe)(?:\\s+.*)?$"
         ],
         "before_minutes": 120
@@ -520,6 +602,7 @@
         "id": "piano-toneelrepetitie-halfuur-na",
         "description": "Na een pianotoneelrepetitie hoeft AVM nog 30 minuten te blijven.",
         "activity_patterns": [
+          "^piano\\s*/\\s*cd\\s+toneelrepetitie(?:\\s+.*)?$",
           "^piano\\s+toneelrepetitie(?:\\s+.*)?$"
         ],
         "after_minutes": 30
@@ -540,7 +623,7 @@
         "description": "Bij één voorstelling op zondag met aanvang 14:00 loopt de AVM-dienst normaal van 10:00 tot 18:00; bij overstaan eindigt de dienst 30 minuten na de voorstelling.",
         "activity_patterns": [
           "^voorstelling(?:\\s+\\d+)?$",
-          "^schoolvoorstelling$"
+          "^schoolvoorstelling(?:\\s+\\d+)?$"
         ],
         "activity_start": "14:00",
         "weekdays": [
@@ -550,13 +633,14 @@
         "start": "10:00",
         "end": "18:00",
         "require_end_to_cover_activity_buffer": true,
-        "preserve_required_window": true
+        "preserve_required_window": true,
+        "start_may_shift_for_rest_to_required_call_time": true
       },
       {
         "id": "schoolvoorstelling-om-1330",
         "description": "Een schoolvoorstelling begint minimaal twee gewerkte uren voor aanvang en eindigt 60 minuten na afloop, of 30 minuten na afloop bij overstaan; lunch- en dinerpauzes tellen niet mee.",
         "activity_patterns": [
-          "^schoolvoorstelling$"
+          "^schoolvoorstelling(?:\\s+\\d+)?$"
         ],
         "activity_start": "13:30",
         "use_avm_call_time": true,
@@ -568,7 +652,7 @@
         "description": "Een voorstelling met aanvang 14:00 begint minimaal twee gewerkte uren vooraf, exclusief pauzes, en eindigt 60 minuten na afloop, of 30 minuten na afloop bij overstaan.",
         "activity_patterns": [
           "^voorstelling(?:\\s+\\d+)?$",
-          "^schoolvoorstelling$"
+          "^schoolvoorstelling(?:\\s+\\d+)?$"
         ],
         "activity_start": "14:00",
         "use_avm_call_time": true,
@@ -580,7 +664,7 @@
         "description": "Een voorstelling begint minimaal twee gewerkte uren voor aanvang, exclusief pauzes, en eindigt 60 minuten na afloop, of 30 minuten na afloop bij overstaan.",
         "activity_patterns": [
           "^voorstelling(?:\\s+\\d+)?$",
-          "^schoolvoorstelling$"
+          "^schoolvoorstelling(?:\\s+\\d+)?$"
         ],
         "use_avm_call_time": true,
         "end_after_activity_minutes": 60,
@@ -588,21 +672,21 @@
       },
       {
         "id": "generale-om-1400",
-        "description": "Een generale met aanvang 14:00 begint om 10:00 en eindigt 60 minuten na de werkelijke eindtijd, of 30 minuten erna bij overstaan.",
+        "description": "Een generale met aanvang 14:00 begint minimaal twee gewerkte uren vooraf en eindigt 60 minuten na de werkelijke eindtijd, of 30 minuten erna bij overstaan.",
         "activity_patterns": [
           "^generale(?:\\s+repetitie)?$"
         ],
         "activity_start": "14:00",
-        "start": "10:00",
+        "use_avm_call_time": true,
         "end_after_activity_minutes": 60
       },
       {
         "id": "generale-relatief-aan-aanvang",
-        "description": "Een generale begint 4,5 uur voor aanvang en eindigt 60 minuten na de werkelijke eindtijd, of 30 minuten erna bij overstaan.",
+        "description": "Een generale begint minimaal twee gewerkte uren voor aanvang en eindigt 60 minuten na de werkelijke eindtijd, of 30 minuten erna bij overstaan.",
         "activity_patterns": [
           "^generale(?:\\s+repetitie)?$"
         ],
-        "start_offset_minutes": -270,
+        "use_avm_call_time": true,
         "end_after_activity_minutes": 60
       }
     ],
@@ -610,7 +694,7 @@
       "description": "Op een dag met twee voorstellingen draaien AVM1 en AVM2 beide voorstellingen. Als de normale aanwezigheid langer dan 13,5 uur zou duren, wordt de voorbereiding vóór de eerste voorstelling ingekort en worden de laatste 13,5 uur van de dag geroosterd.",
       "activity_patterns": [
         "^voorstelling(?:\\s+\\d+)?$",
-        "^schoolvoorstelling$"
+        "^schoolvoorstelling(?:\\s+\\d+)?$"
       ],
       "minimum_count": 2,
       "cap_at_maximum_shift": true
@@ -625,16 +709,19 @@
     "allow_required_activity_replacement_when_needed": true,
     "primary_presence_activity_patterns": [
       "^voorstelling(?:\\s+\\d+)?$",
-      "^schoolvoorstelling$"
+      "^schoolvoorstelling(?:\\s+\\d+)?$"
     ],
     "fixed_primary_activity_patterns": [
       "^proefbouw(?:\\s+.*)?$",
       "^(?:OT|ontwerpteam)(?:\\s+(?:meeting|overleg))?(?:\\s+.*)?$",
-      "^(?:presentatie\\s+)?cast\\s*(?:&|en)\\s*huis(?:\\s+presentatie)?$"
+      "^(?:presentatie\\s+)?cast\\s*(?:&|en)\\s*huis(?:\\s+presentatie)?$",
+      "^voorstelling(?:\\s+\\d+)?$",
+      "^schoolvoorstelling(?:\\s+\\d+)?$"
     ],
     "replaceable_activity_patterns": [
       "\\bbelichten\\b",
       "^cd\\s+toneelrepetitie(?:\\s+.*)?$",
+      "^piano\\s*/\\s*cd\\s+toneelrepetitie(?:\\s+.*)?$",
       "^piano\\s+toneelrepetitie(?:\\s+.*)?$",
       "^piano\\s+CD(?:\\s+.*)?$"
     ],
@@ -659,6 +746,13 @@
           "^cd\\s+toneelrepetitie(?:\\s+.*)?$"
         ],
         "priority": 0
+      },
+      {
+        "description": "Gecombineerde piano-/cd-toneelrepetities worden na belichten en cd-toneelrepetities overgenomen.",
+        "activity_patterns": [
+          "^piano\\s*/\\s*cd\\s+toneelrepetitie(?:\\s+.*)?$"
+        ],
+        "priority": 2
       },
       {
         "description": "Pianotoneelrepetities worden pas na belichten en cd-toneelrepetities overgenomen.",
@@ -714,12 +808,12 @@
         "description": "Voorstellingen zijn vaste AVM1/AVM2-events en worden niet door TEAM-AVM overgenomen.",
         "activity_patterns": [
           "^voorstelling(?:\\s+\\d+)?$",
-          "^schoolvoorstelling$"
+          "^schoolvoorstelling(?:\\s+\\d+)?$"
         ],
         "priority": 20
       }
     ],
-    "description": "Een langere dienst bij AVM1 of AVM2 heeft voorrang op TEAM-AVM zolang de werkdag maximaal 13,5 uur duurt, inclusief maximaal 30 minuten lunchpauze en 60 minuten dinerpauze, en minimaal 11 uur rust behouden blijft. Alleen als anders een CAO-conflict ontstaat, wordt dekking volgens vervangingsprioriteit naar TEAM-AVM verplaatst. Een verplichte activiteit blijft gedekt; de persoonsvoorkeur is ondergeschikt aan de CAO. Bij iedere voorstelling blijft waar mogelijk minimaal één primaire AVM-positie aanwezig."
+    "description": "Een langere dienst bij AVM1 of AVM2 heeft voorrang op TEAM-AVM zolang de werkdag maximaal 13,5 uur duurt, inclusief maximaal 30 minuten lunchpauze en 60 minuten dinerpauze, en minimaal 11 uur rust behouden blijft. Alleen als anders een CAO-conflict ontstaat, wordt dekking volgens vervangingsprioriteit naar TEAM-AVM verplaatst. Een verplichte activiteit blijft gedekt; de persoonsvoorkeur is ondergeschikt aan de CAO. Voorstellingen blijven altijd bij AVM1 en AVM2 en worden nooit door TEAM-AVM overgenomen."
   },
   "required_text": [
     "AVM"

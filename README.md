@@ -115,8 +115,9 @@ Een conflict voorkomt het maken van de uitvoer niet.
 De planner herkent vaste Nederlandse en Engelse termen uit de
 productieplanning.
 
-De normale AVM-periode begint op de dag van de eerste activiteit op het
-Hoofdtoneel. De volgende activiteiten kunnen al vóór die dag worden
+De normale AVM-periode begint op de dag van de eerste activiteit op een
+speellocatie: het Hoofdtoneel of Studio Boekman. De volgende activiteiten
+kunnen al vóór die dag worden
 ingepland:
 
 - proefbouw;
@@ -133,15 +134,17 @@ De planner neemt deze activiteiten niet op in het AVM-rooster:
 - technische tijd;
 - licht richten;
 - reguliere HNB-balletrepetities;
-- repetities in een studio of de Grote Studio.
+- repetities in een studio of de Grote Studio; Studio Boekman geldt hierbij
+  als speellocatie en niet als gewone repetitiestudio.
 
 De benoemde uitzonderingen, zoals de grote studiorepetitie van DNO en
 specifieke HNB-repetities, worden wel volgens hun eigen regels beoordeeld.
 
-Termen zoals `video`, `geluid` en `soundcheck` zijn niet eenduidig genoeg. De
-planner zet deze in `issues.txt` voor handmatige controle. Dat gebeurt ook met
-losse AVM-notities die niet betrouwbaar aan één activiteit kunnen worden
-gekoppeld.
+Termen zoals `video` en `geluid` zijn niet eenduidig genoeg. De planner zet
+deze in `issues.txt` voor handmatige controle. Een soundcheck in Studio
+Boekman is de expliciete uitzondering en vereist één AVM'er. Losse
+AVM-notities die niet betrouwbaar aan één activiteit kunnen worden gekoppeld,
+worden eveneens ter controle gemarkeerd.
 
 Een eindtijd na middernacht wordt op de volgende kalenderdag gezet.
 
@@ -154,16 +157,18 @@ uur vóór tot één uur na de activiteit.
 | Activiteit | Bezetting | Aanwezigheid |
 |---|---|---|
 | Voorstelling of schoolvoorstelling | AVM1 en AVM2 | 120 min vooraf, 60 min na afloop*|
-| Generale repetitie | AVM1 en AVM2 | 4,5 uur vooraf, 60 min na afloop*|
+| Generale repetitie | AVM1 en AVM2 | 120 gewerkte min vooraf, 60 min na afloop*|
 | Voorgenerale orkest (VGO) of pianovoorgenerale (PVG) | AVM1 en AVM2 | 120 min vooraf, 60 min na afloop*|
 | Orkesttoneelrepetitie (OTR) of zit-/sitzprobe (ZIT) | AVM1 en AVM2 | 120 min vooraf, 60 min na afloop*|
-| Orkestrepetitie op het Hoofdtoneel | AVM1 en AVM2 | 60 min vooraf, 60 min na afloop*|
-| Regierepetitie op het Hoofdtoneel | AVM1 en AVM2 | 120 min vooraf, 60 min na afloop*|
+| Orkestrepetitie op een speellocatie | AVM1 en AVM2 | 120 min vooraf, 60 min na afloop*|
+| Regierepetitie op een speellocatie | AVM1 en AVM2 | 120 min vooraf, 60 min na afloop*|
 | Technische repetitie | Eén AVM'er, bij voorkeur AVM1 | 60 min vooraf, 60 min na afloop*|
-| Pianotoneelrepetitie | AVM1 en AVM2 | 60 min vooraf, 30 min na afloop |
-| Solistenrepetitie | AVM1 en AVM2 | 30 min vooraf, 30 min na afloop |
-| Cd-toneelrepetitie | Eén van beide AVM'ers | 60 min vooraf, 30 min na afloop |
+| Pianotoneelrepetitie | AVM1 en AVM2 | Eén AVM'er 60 min vooraf, de andere vanaf aanvang; één AVM'er sluit 30 min af |
+| Gecombineerde piano-/cd-toneelrepetitie | AVM1 en AVM2 | Eén AVM'er 60 min vooraf, de andere vanaf aanvang; één AVM'er sluit 30 min af |
+| Solistenrepetitie | AVM1 en AVM2 | Eén AVM'er 30 min vooraf, de andere vanaf aanvang; 30 min na afloop |
+| Cd-toneelrepetitie | AVM1 en AVM2 | Eén AVM'er 60 min vooraf, de andere vanaf aanvang; één AVM'er sluit 30 min af |
 | Belichten | Precies één van beide AVM'ers | 30 min vooraf, 30 min na afloop |
+| Soundcheck in Studio Boekman | Precies één van beide AVM'ers | 60 min vooraf, 60 min na afloop*|
 | Piano-cd | AVM1 en AVM2 | 60 min vooraf, 30 min na afloop |
 | Proefbouw | AVM1 | Alleen tijdens de activiteit |
 | Ontwerpteamoverleg (OT) | AVM1 | Alleen tijdens de activiteit; verhindering handmatig controleren |
@@ -174,10 +179,18 @@ Lunch en diner tellen niet mee als gewerkte voorbereidingstijd. Een
 schoolvoorstelling om 13:30 met een lunchpauze in de voorbereiding krijgt
 daarom een oproeptijd van 11:00.
 
+Bij PTR, CD en SR verdeelt de planner de vroege voorbereiding afwisselend over
+AVM1 en AVM2. Over een project verschilt het aantal vroege voorbereidingen
+daardoor maximaal één.
+
+Bij PTR en CD verdeelt de planner ook de afsluiting over AVM1 en AVM2. Per
+repetitie hoeft maar één AVM'er na afloop te blijven; waar mogelijk is dit de
+andere AVM'er dan degene die de vroege voorbereiding deed.
+
 Voor enkele situaties gelden aparte diensttijden:
 
-- Een generale om 14:00 begint om 10:00 en eindigt 60 minuten na de werkelijke
-  eindtijd, of 30 minuten erna bij overstaan.
+- Een generale begint minimaal twee gewerkte uren vooraf en eindigt 60 minuten
+  na de werkelijke eindtijd, of 30 minuten erna bij overstaan.
 - Bij één zondagvoorstelling om 14:00 is de dienst normaal 10:00-18:00, maar
   bij overstaan eindigt de dienst 30 minuten na de voorstelling. De regel geldt
   alleen als de benodigde tijd na afloop volledig binnen de dienst past.
@@ -195,7 +208,7 @@ eerste voorstelling vervallen; controleer die situatie altijd handmatig.
 - De presentatie van cast en huis wordt door AVM1 gedaan.
 - De grote DNO-studiorepetitie wordt door AVM1 gedaan.
 - Voorbereiden voor belichten wordt alleen op de eerste bijbehorende dag op
-  het Hoofdtoneel ingepland. Normaal is dit een gebruikelijk moment voor AVM1.
+  een speellocatie ingepland. Normaal is dit een gebruikelijk moment voor AVM1.
 - Als decorinbouw is bevestigd, zijn AVM1 en AVM2 verplicht bij die
   voorbereiding.
 - Decorinbouw in de Montagehal wordt door AVM1 gedaan.
@@ -246,8 +259,9 @@ overstaan worden alle regels met 60 minuten uitloop verkort naar 30 minuten:
 Bij een conflict probeert de planner eerst daarvoor geschikte activiteiten
 naar TEAM-AVM te verplaatsen. Piano-cd, belichten en cd-toneelrepetitie komen
 daarvoor als eerste in aanmerking. Proefbouw, ontwerpteamoverleg en de
-DNO-presentatie van cast en huis blijven altijd bij de vaste AVM-posities. Bij
-een voorstelling blijft minimaal één van de vaste AVM-posities aanwezig.
+DNO-presentatie van cast en huis blijven altijd bij de vaste AVM-posities.
+Voorstellingen blijven volledig bij AVM1 en AVM2 en worden nooit naar
+TEAM-AVM verplaatst.
 
 De CAO-controle is gedeeltelijk. De planner controleert alleen:
 

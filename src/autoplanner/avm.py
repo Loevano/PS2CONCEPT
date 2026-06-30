@@ -326,7 +326,8 @@ def _call_time_excluding_breaks(
             key = (break_start, duration)
             if key in included:
                 continue
-            if call_time <= break_start < item.start:
+            break_end = break_start + timedelta(minutes=duration)
+            if break_start < item.start and break_end > call_time:
                 call_time -= timedelta(minutes=duration)
                 included.add(key)
                 changed = True
@@ -403,7 +404,8 @@ def apply_avm_rules(
         )
         if outside_scope:
             item.avm_reasons.append(
-                "Buiten AVM-roosterperiode: vóór de dag van de eerste Hoofdtoneel-activiteit"
+                "Buiten AVM-roosterperiode: vóór de dag van de eerste activiteit "
+                "op een speellocatie"
             )
             continue
         if exclusion is not None:
@@ -475,6 +477,10 @@ def apply_avm_rules(
         for call_rule in rules.get("call_time_rules", []):
             if not _matches_rule_context(schedule, item, call_rule):
                 continue
+            if call_rule.get("single_preparer"):
+                item.avm_single_preparer = True
+            if call_rule.get("single_closer"):
+                item.avm_single_closer = True
             if "working_minutes_before" in call_rule:
                 item.avm_call_time = _call_time_excluding_breaks(
                     schedule,

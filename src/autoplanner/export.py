@@ -45,8 +45,10 @@ ACTIVITY_LEGEND_LINES = [
     "  GEN = Generale            OR  = Orkestrepetitie",
     "  OTR = Orkesttoneelrep.    ZIT = Zit/Sitzprobe",
     "  PTR = Pianotoneelrepetitie",
+    "  PTR/CD = Piano-/cd-toneelrepetitie",
     "  PB  = Proefbouw           PRES = Presentatie cast & huis",
-    "  PVG = Pianovoorgenerale   SR  = Solistenrepetitie",
+    "  PVG = Pianovoorgenerale   SC  = Soundcheck",
+    "  SR  = Solistenrepetitie",
     "  RR  = Regierepetitie",
     "  SV  = Schoolvoorstelling  TR  = Technische repetitie",
     "  V   = Voorstelling        VGO = Voorgenerale orkest",
@@ -56,8 +58,10 @@ COMPACT_ACTIVITY_LEGEND_LINES = [
     "  GEN = Generale            OR  = Orkestrepetitie",
     "  OTR = Orkesttoneelrep.    ZIT = Zit/Sitzprobe",
     "  PTR = Pianotoneelrepetitie",
+    "  PTR/CD = Piano-/cd-toneelrepetitie",
     "  PB  = Proefbouw           PRES = Presentatie cast & huis",
-    "  PVG = Pianovoorgenerale   SR  = Solistenrepetitie",
+    "  PVG = Pianovoorgenerale   SC  = Soundcheck",
+    "  SR  = Solistenrepetitie",
     "  RR  = Regierepetitie",
     "  SV  = Schoolvoorstelling  TR  = Technische repetitie",
     "  VGO = Voorgenerale orkest  V1/V2/... = Voorstelling",
@@ -70,9 +74,11 @@ EVENT_ORDER = {
     "OTR": 3,
     "ZIT": 3,
     "OR": 4,
+    "SC": 5,
     "TR": 5,
     "RR": 5,
     "PTR": 6,
+    "PTR/CD": 6,
     "SR": 7,
     "CD": 8,
     "BEL": 9,
@@ -110,6 +116,8 @@ def write_csv(schedule: ProductionSchedule, target: str | Path) -> None:
         "avm_standaardpositie",
         "avm_flexibele_posities",
         "avm_aanwezig_vanaf",
+        "een_avm_doet_vroege_voorbereiding",
+        "een_avm_doet_afsluiting",
         "avm_daguitloop_minuten",
         "avm_planniveau",
         "avm_toewijzingsstatus",
@@ -145,6 +153,12 @@ def write_csv(schedule: ProductionSchedule, target: str | Path) -> None:
                         item.avm_call_time.strftime("%Y-%m-%d %H:%M")
                         if item.avm_call_time
                         else ""
+                    ),
+                    "een_avm_doet_vroege_voorbereiding": (
+                        "ja" if item.avm_single_preparer else "nee"
+                    ),
+                    "een_avm_doet_afsluiting": (
+                        "ja" if item.avm_single_closer else "nee"
                     ),
                     "avm_daguitloop_minuten": (
                         item.avm_day_wrap_minutes
@@ -265,13 +279,15 @@ def _schedule_activity_code(activity: str) -> str:
         (r"^(?:zit|sitzprobe)(?:\s+.*)?$", "ZIT"),
         (r"^voorgenerale\s+orkest", "VGO"),
         (r"^piano\s+voorgenerale", "PVG"),
+        (r"^piano\s*/\s*cd\s+toneelrepetitie", "PTR/CD"),
         (r"^piano\s+toneelrepetitie", "PTR"),
         (r"^technische\s+repetitie", "TR"),
         (r"^cd\s+toneelrepetitie", "CD"),
         (r"^orkestrepetitie", "OR"),
+        (r"^sound\s*check(?:\s+.*)?$", "SC"),
         (r"^solistenrepetitie", "SR"),
         (r"^generale(?:\s+repetitie)?$", "GEN"),
-        (r"^schoolvoorstelling$", "SV"),
+        (r"^schoolvoorstelling(?:\s+\d+)?$", "SV"),
         (r"^proefbouw(?:\s+.*)?$", "PB"),
         (
             r"^(?:presentatie\s+)?cast\s*(?:&|en)\s*huis(?:\s+presentatie)?$",
@@ -635,14 +651,14 @@ def render_avm_events_text(schedule: ProductionSchedule) -> str:
     ]
     _append_table(
         lines,
-        ["Datum", "Tijd", "Locatie", "Activiteit", "Code", "Bezetting"],
+        ["Datum", "Code", "Tijd", "Locatie", "Activiteit", "Bezetting"],
         [
             [
                 f"{DUTCH_DAYS_SHORT[item.day.weekday()]} {item.day:%d-%m-%Y}",
+                _event_activity_code(item.activity),
                 _activity_time(item),
                 item.location or "locatie NTB",
                 item.activity,
-                _event_activity_code(item.activity),
                 _staffing_text(item),
             ]
             for item in sorted(required, key=lambda value: (value.day, value.start))
@@ -685,14 +701,14 @@ def render_avm_events_text(schedule: ProductionSchedule) -> str:
     )
     _append_table(
         lines,
-        ["Datum", "Tijd", "Locatie", "Activiteit", "Code", "Dekking"],
+        ["Datum", "Code", "Tijd", "Locatie", "Activiteit", "Dekking"],
         [
             [
                 f"{DUTCH_DAYS_SHORT[item.day.weekday()]} {item.day:%d-%m-%Y}",
+                _event_activity_code(item.activity),
                 _activity_time(item),
                 item.location or "locatie NTB",
                 item.activity,
-                _event_activity_code(item.activity),
                 _staffing_text(item),
             ]
             for item in sorted(optional, key=lambda value: (value.day, value.start))
@@ -707,14 +723,14 @@ def render_avm_events_text(schedule: ProductionSchedule) -> str:
     )
     _append_table(
         lines,
-        ["Datum", "Tijd", "Locatie", "Activiteit", "Code", "Reden"],
+        ["Datum", "Code", "Tijd", "Locatie", "Activiteit", "Reden"],
         [
             [
                 f"{DUTCH_DAYS_SHORT[item.day.weekday()]} {item.day:%d-%m-%Y}",
+                _event_activity_code(item.activity),
                 _activity_time(item),
                 item.location or "locatie NTB",
                 item.activity,
-                _event_activity_code(item.activity),
                 "; ".join(item.avm_reasons) or "AVM-relatie controleren",
             ]
             for item in sorted(review, key=lambda value: (value.day, value.start))
@@ -777,14 +793,14 @@ def render_avm_events_text(schedule: ProductionSchedule) -> str:
     )
     _append_table(
         lines,
-        ["Datum", "Tijd", "Locatie", "Activiteit", "Code", "Reden"],
+        ["Datum", "Code", "Tijd", "Locatie", "Activiteit", "Reden"],
         [
             [
                 f"{DUTCH_DAYS_SHORT[item.day.weekday()]} {item.day:%d-%m-%Y}",
+                _event_activity_code(item.activity),
                 _activity_time(item),
                 item.location or "locatie NTB",
                 _activity_with_details(item),
-                _event_activity_code(item.activity),
                 "; ".join(item.avm_reasons) or "Geen AVM-regel van toepassing",
             ]
             for item in sorted(not_needed, key=lambda value: (value.day, value.start))
