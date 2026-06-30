@@ -312,33 +312,34 @@ Voor iedere activiteit stelt de planner deze vragen:
 
 De actieve bezettings- en aanwezigheidsregels zijn:
 
-| Activiteit/geval | Bezetting | Oproep/venster | Niveau/bijzonderheid |
-|---|---:|---|---|
-| Proefbouw | AVM1 | activiteit zelf, geen buffer | verplicht |
-| OT/ontwerpteam | AVM1 | standaardbuffer | verplicht, verhindering controleren |
-| DNO cast-en-huispresentatie | AVM1 | standaardbuffer | verplicht |
-| DNO voorbereiden belichten, eerste Hoofdtoneeldag | AVM1 | standaardbuffer | gebruikelijk |
-| Zelfde, decorinbouw bevestigd | AVM1 + AVM2 | standaardbuffer | verplicht |
-| Grote DNO-studiorepetitie | AVM1 | standaardbuffer | verplicht |
-| DNO Montagehal/decorinbouw | AVM1 | standaardbuffer | verplicht |
-| Oplevering decor | één flexibele AVM | standaardbuffer | richtlijn |
-| RR op Hoofdtoneel | AVM1 + AVM2 | 2 uur vooraf | verplicht |
-| Piano CD | AVM1 + AVM2 | standaardbuffer | verplicht, lage TEAM-prioriteit |
-| Voorstelling/schoolvoorstelling | AVM1 + AVM2 | 2 gewerkte uren vooraf; 1 uur na showeinde | verplicht |
-| Generale | AVM1 + AVM2 | speciaal relatief venster | verplicht |
-| VGO/PVG | AVM1 + AVM2 | 2 gewerkte uren vooraf; 30/60 min uitloop | verplicht |
-| OTR | AVM1 + AVM2 | 2 gewerkte uren vooraf | verplicht |
-| Zit/Sitzprobe (`ZIT`) | AVM1 + AVM2 | gelijk aan OTR | verplicht |
-| Pianotoneelrepetitie | AVM1 + AVM2 | standaard vooraf; 30 min erna | verplicht |
-| Technische repetitie | één AVM, voorkeur AVM1 | standaardbuffer | verplicht |
-| CD-toneelrepetitie | één flexibele AVM | standaardbuffer | verplicht |
-| Belichten | exact één flexibele AVM | 30 min voor en na | verplicht |
-| Orkestrepetitie op Hoofdtoneel | AVM1 + AVM2 | standaardbuffer | verplicht |
-| Solistenrepetitie | AVM1 + AVM2 | 30 min voor en na | verplicht |
+| Activiteit/geval | Bezetting | Minuten vóór aanvang | Minuten na afloop | Niveau/bijzonderheid |
+|---|---:|---:|---:|---|
+| Proefbouw | AVM1 | 0 | 0 | verplicht |
+| OT/ontwerpteam | AVM1 | 60 | 60 | verplicht, verhindering controleren |
+| DNO cast-en-huispresentatie | AVM1 | 60 | 60 | verplicht |
+| DNO voorbereiden belichten, eerste Hoofdtoneeldag | AVM1 | 60 | 60 | gebruikelijk |
+| Zelfde, decorinbouw bevestigd | AVM1 + AVM2 | 60 | 60 | verplicht |
+| Grote DNO-studiorepetitie | AVM1 | 60 | 60 | verplicht |
+| DNO Montagehal/decorinbouw | AVM1 | 60 | 60 | verplicht |
+| Oplevering decor | één flexibele AVM | 60 | 60 | richtlijn |
+| RR op Hoofdtoneel | AVM1 + AVM2 | 120 | 60 | verplicht |
+| Piano CD | AVM1 + AVM2 | 60 | 60 | verplicht, lage TEAM-prioriteit |
+| Voorstelling/schoolvoorstelling | AVM1 + AVM2 | 120 gewerkte minuten¹ | 60 | verplicht |
+| Generale | AVM1 + AVM2 | 270 | afhankelijk van de activiteit² | verplicht |
+| VGO/PVG | AVM1 + AVM2 | 120 gewerkte minuten¹ | 30 bij overstaan, anders 60 | verplicht |
+| OTR | AVM1 + AVM2 | 120 gewerkte minuten¹ | 60 | verplicht |
+| Zit/Sitzprobe (`ZIT`) | AVM1 + AVM2 | 120 gewerkte minuten¹ | 60 | verplicht |
+| Pianotoneelrepetitie | AVM1 + AVM2 | 60 | 30 | verplicht |
+| Technische repetitie | één AVM, voorkeur AVM1 | 60 | 60 | verplicht |
+| CD-toneelrepetitie | één flexibele AVM | 60 | 60 | verplicht |
+| Belichten | exact één flexibele AVM | 30 | 30 | verplicht |
+| Orkestrepetitie op Hoofdtoneel | AVM1 + AVM2 | 60 | 60 | verplicht |
+| Solistenrepetitie | AVM1 + AVM2 | 30 | 30 | verplicht |
 
-`Standaardbuffer` betekent momenteel één uur vóór en één uur na de
-activiteit, tenzij een afsluitmarker of specifiekere regel de eindtijd
-vervangt.
+¹ Lunch- en dinerpauzes tellen niet mee in de minuten vóór aanvang.
+
+² Een generale eindigt 240 minuten na de aanvangstijd. Het aantal minuten na
+afloop hangt daardoor af van de duur van de generale.
 
 ### 5. Events verdelen over AVM1 en AVM2
 
