@@ -3,6 +3,7 @@ from pathlib import Path
 
 from autoplanner.avm import apply_avm_rules, load_rules
 from autoplanner.export import (
+    EVENT_ORDER,
     render_avm_events_text,
     render_daily_summary_text,
     render_text,
@@ -21,6 +22,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class ParserTests(unittest.TestCase):
+    def test_regierepetitie_has_event_order_five(self):
+        self.assertEqual(EVENT_ORDER["RR"], 5)
+
     def test_english_schedule_metadata_dates_and_inline_locations(self):
         schedule = parse_page_texts(
             [

@@ -71,13 +71,13 @@ EVENT_ORDER = {
     "ZIT": 3,
     "OR": 4,
     "TR": 5,
+    "RR": 5,
     "PTR": 6,
     "SR": 7,
     "CD": 8,
     "BEL": 9,
     "PB": 10,
     "PRES": 11,
-    "RR": 12,
 }
 
 
