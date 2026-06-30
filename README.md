@@ -97,7 +97,8 @@ python3 -m venv .venv
   het Hoofdtoneel. Proefbouw, OT, de opera-presentatie van cast en huis, de
   grote DNO-studiorepetitie, voorwaardelijk Montagehalwerk en expliciete
   DNO-voorbereidingsactiviteiten zijn vroege uitzonderingen.
-- Proefbouw en OT worden aan AVM1 toegewezen. OT-beschikbaarheid blijft als
+- Proefbouw en OT worden aan AVM1 toegewezen. Voor een proefbouw wordt geen
+  extra opbouw- of afbouwtijd ingepland. OT-beschikbaarheid blijft als
   handmatig controlepunt bij het event staan.
 - Alleen bij DNO-opera wordt de presentatie van cast en huis aan AVM1
   toegewezen. Een conflict wordt geflagd en niet stilzwijgend vervangen.
@@ -119,14 +120,14 @@ python3 -m venv .venv
 - Licht richten en technische tijd worden niet geroosterd. Oplevering van het
   decor is een richtlijn: inplannen zolang dit zonder CAO-conflict kan.
 - Belichten vereist precies één AVM'er, aanwezig vanaf minimaal 30 minuten voor
-  aanvang. Een DNO-regierepetitie vereist AVM1 en AVM2, beiden vanaf minimaal
-  één uur vooraf.
+  aanvang. Een regierepetitie op het Hoofdtoneel vereist AVM1 en AVM2, beiden
+  vanaf minimaal twee uur vooraf.
 - Piano CD vereist AVM1 en AVM2, maar is bij conflictoplossing een vroege
   kandidaat voor TEAM-AVM-overname.
 - De huidige bedrijfsregels vereisen twee AVM'ers bij iedere voorstelling
   (inclusief schoolvoorstelling), alle generales en orkest-gerelateerde
   repetities zoals orkestrepetitie, orkesttoneelrepetitie en voorgenerale orkest.
-- Bij OTR, VGO en PVG zijn de AVM'ers minimaal twee gewerkte uren voor aanvang
+- Bij OTR, ZIT (Zit/Sitzprobe), VGO en PVG zijn de AVM'ers minimaal twee gewerkte uren voor aanvang
   aanwezig; lunch- en dinerpauzes tellen niet mee.
 - HNB-pianotoneelrepetities staan bij voorkeur met twee AVM'ers, maar kunnen
   bij CAO-druk per situatie naar TEAM-AVM worden verplaatst.
@@ -149,7 +150,10 @@ python3 -m venv .venv
 - Verplichte activiteiten blijven gedekt. Een voorkeur voor AVM1/AVM2 mag bij
   CAO-druk door TEAM-AVM worden overgenomen; activiteitprioriteit en
   persoonsvoorkeur zijn afzonderlijke beslissingen.
-- Orkestrepetities en solistenrepetities vereisen twee AVM'ers: AVM 1 en AVM 2.
+- Zit/Sitzprobe heeft code `ZIT` en dezelfde dubbele bezetting en
+  vervangingsprioriteit als OTR.
+- Orkestrepetities op het Hoofdtoneel en solistenrepetities vereisen twee
+  AVM'ers: AVM 1 en AVM 2.
 - Bij voorstellingen en schoolvoorstellingen geldt een minimale
   aanwezigheidstijd van twee gewerkte uren vóór aanvang. Lunchpauze (30
   minuten) en dinerpauze (60 minuten) tellen daarbij niet mee. De planner kan
@@ -224,13 +228,22 @@ is AVM eveneens 30 minuten voor aanvang aanwezig en blijft AVM 30 minuten na
 afloop. Na een pianotoneelrepetitie hoeft AVM nog 30 minuten te blijven.
 Voorstellingen en schoolvoorstellingen beginnen minimaal twee gewerkte uren voor
 aanvang; een aanwezige lunchpauze van 30 minuten en dinerpauze van 60 minuten
-worden vóór die aanlooptijd toegevoegd. De dienst eindigt vier uur na aanvang.
+worden vóór die aanlooptijd toegevoegd. De dienst eindigt één uur na de
+werkelijke eindtijd van de voorstelling.
+Bij één voorstelling op zondag om 14:00 is de dienst vast 10:00-18:00, mits
+18:00 ook de vereiste uitloop of afbouw na de show volledig dekt. Anders wordt
+de eindtijd vanaf de werkelijke showeindtijd berekend. Deze regel geldt niet op
+een zondag met twee voorstellingen.
 Generale repetities behouden het relatieve venster van 4,5 uur vóór tot 4 uur
 na aanvang. Een generale met aanvang 14:00 wordt 10:00-18:00 geroosterd.
 Het tekstrooster vermeldt afwijkingen van de streefduur niet in de opmerkingen.
-Diensten die korter uitkomen, beginnen eerder om de achturige streefduur te
-halen; de toegevoegde tijd staat als opmerking vermeld. Deze aanvulling wordt
-ingekort als anders minder dan elf uur nachtrust overblijft.
+Diensten die korter uitkomen, beginnen eerst eerder om de achturige streefduur
+te halen, maar de extra streeftijdaanvulling vervroegt een dienst nooit tot vóór
+09:00. Als de aanvulling aan de voorkant daardoor of door de minimale nachtrust
+niet volledig kan, wordt de resterende tijd aan het einde toegevoegd. Een
+verplichte oproeptijd vóór 09:00 blijft wel leidend. Beide aanvullingen stoppen
+zodra anders minder dan elf uur nachtrust tot een aangrenzende dienst
+overblijft. De toegevoegde tijd staat als opmerking vermeld.
 Diensten boven 13,5 uur en minder dan elf uur rust worden automatisch
 opgelost door activiteiten naar TEAM-AVM-diensten te verplaatsen; als dat niet
 lukt, blijft een CAO-conflict zichtbaar en krijgt het gehele rooster de status

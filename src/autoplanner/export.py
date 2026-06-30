@@ -43,7 +43,8 @@ DUTCH_MONTHS = [
 ACTIVITY_LEGEND_LINES = [
     "  BEL = Belichten           CD  = Cd-toneelrepetitie",
     "  GEN = Generale            OR  = Orkestrepetitie",
-    "  OTR = Orkesttoneelrep.    PTR = Pianotoneelrepetitie",
+    "  OTR = Orkesttoneelrep.    ZIT = Zit/Sitzprobe",
+    "  PTR = Pianotoneelrepetitie",
     "  PB  = Proefbouw           PRES = Presentatie cast & huis",
     "  PVG = Pianovoorgenerale   SR  = Solistenrepetitie",
     "  RR  = Regierepetitie",
@@ -53,7 +54,8 @@ ACTIVITY_LEGEND_LINES = [
 COMPACT_ACTIVITY_LEGEND_LINES = [
     "  BEL = Belichten           CD  = Cd-toneelrepetitie",
     "  GEN = Generale            OR  = Orkestrepetitie",
-    "  OTR = Orkesttoneelrep.    PTR = Pianotoneelrepetitie",
+    "  OTR = Orkesttoneelrep.    ZIT = Zit/Sitzprobe",
+    "  PTR = Pianotoneelrepetitie",
     "  PB  = Proefbouw           PRES = Presentatie cast & huis",
     "  PVG = Pianovoorgenerale   SR  = Solistenrepetitie",
     "  RR  = Regierepetitie",
@@ -66,6 +68,7 @@ EVENT_ORDER = {
     "GEN": 1,
     "VGO": 2,
     "OTR": 3,
+    "ZIT": 3,
     "OR": 4,
     "TR": 5,
     "PTR": 6,
@@ -259,6 +262,7 @@ def _short_production_name(title: str | None) -> str:
 def _schedule_activity_code(activity: str) -> str:
     mappings = [
         (r"^orkest\s*toneelrepetitie", "OTR"),
+        (r"^(?:zit|sitzprobe)(?:\s+.*)?$", "ZIT"),
         (r"^voorgenerale\s+orkest", "VGO"),
         (r"^piano\s+voorgenerale", "PVG"),
         (r"^piano\s+toneelrepetitie", "PTR"),

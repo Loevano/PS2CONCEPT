@@ -93,7 +93,7 @@
     },
     {
       "id": "ballet-repetities",
-      "description": "AVM is niet aanwezig bij reguliere repetities van een HNB-balletproductie. Op het Hoofdtoneel zijn cd-toneelrepetities, solistenrepetities, orkestrepetities, orkesttoneelrepetities, pianotoneelrepetities en generale repetities expliciete uitzonderingen en worden ze volgens hun eigen bezettingsregels geroosterd.",
+      "description": "AVM is niet aanwezig bij reguliere repetities van een HNB-balletproductie. Op het Hoofdtoneel zijn regierepetities, zit-/sitzprobes, cd-toneelrepetities, solistenrepetities, orkestrepetities, orkesttoneelrepetities, pianotoneelrepetities en generale repetities expliciete uitzonderingen en worden ze volgens hun eigen bezettingsregels geroosterd.",
       "production_patterns": [
         "^HNB\\b"
       ],
@@ -101,6 +101,8 @@
         "repetitie"
       ],
       "exclude_activity_patterns": [
+        "^regie\\s*repetitie(?:\\s+.*)?$",
+        "^(?:zit|sitzprobe)(?:\\s+.*)?$",
         "^piano\\s+toneelrepetitie(?:\\s+.*)?$",
         "^cd\\s+toneelrepetitie(?:\\s+.*)?$",
         "^solistenrepetitie(?:\\s+.*)?$",
@@ -232,10 +234,10 @@
       ]
     },
     {
-      "id": "dno-regierepetitie",
-      "description": "Een DNO-regierepetitie vereist AVM1 en AVM2, met aanwezigheid vanaf minimaal één uur voor aanvang.",
-      "production_patterns": [
-        "^DNO\\b"
+      "id": "regierepetitie-hoofdtoneel",
+      "description": "Een regierepetitie op het Hoofdtoneel vereist AVM1 en AVM2, met aanwezigheid vanaf minimaal twee uur voor aanvang.",
+      "location_patterns": [
+        "^Hoofdtoneel$"
       ],
       "activity_patterns": [
         "^regie\\s*repetitie(?:\\s+.*)?$"
@@ -285,6 +287,14 @@
       "required_count": 2
     },
     {
+      "id": "zit-sitzprobe",
+      "description": "Een Zit of Sitzprobe heeft dezelfde bezetting als een orkesttoneelrepetitie en vereist twee AVM'ers.",
+      "activity_patterns": [
+        "^(?:zit|sitzprobe)(?:\\s+.*)?$"
+      ],
+      "required_count": 2
+    },
+    {
       "id": "piano-toneelrepetitie",
       "description": "Een HNB-pianotoneelrepetitie staat bij voorkeur met twee AVM'ers; bij CAO-druk kan per situatie naar TEAM-AVM worden gekeken.",
       "activity_patterns": [
@@ -322,13 +332,16 @@
       "required_count": 1,
       "maximum_count": 1,
       "flexible_positions": [
-        "AVM2",
-        "AVM1"
+        "AVM1",
+        "AVM2"
       ]
     },
     {
       "id": "orkestrepetitie",
-      "description": "Een orkestrepetitie vereist twee AVM'ers.",
+      "description": "Een orkestrepetitie op het Hoofdtoneel vereist twee AVM'ers.",
+      "location_patterns": [
+        "^Hoofdtoneel$"
+      ],
       "activity_patterns": [
         "^orkestrepetitie(?:\\s+.*)?$"
       ],
@@ -359,10 +372,11 @@
       }
     },
     {
-      "id": "otr-vgo-pvg-twee-gewerkte-uren-vooraf",
-      "description": "Voor OTR, VGO en PVG is AVM minimaal twee gewerkte uren voor aanvang aanwezig; lunch- en dinerpauzes tellen niet mee.",
+      "id": "otr-zit-vgo-pvg-twee-gewerkte-uren-vooraf",
+      "description": "Voor OTR, ZIT, VGO en PVG is AVM minimaal twee gewerkte uren voor aanvang aanwezig; lunch- en dinerpauzes tellen niet mee.",
       "activity_patterns": [
         "^orkest\\s*toneelrepetitie(?:\\s+.*)?$",
+        "^(?:zit|sitzprobe)(?:\\s+.*)?$",
         "^(?:piano\\s+)?voorgenerale(?:\\s+.*)?$"
       ],
       "working_minutes_before": 120,
@@ -380,15 +394,15 @@
       "minutes_before": 30
     },
     {
-      "id": "dno-regierepetitie-uur-vooraf",
-      "description": "Voor een DNO-regierepetitie zijn AVM1 en AVM2 minimaal één uur voor aanvang aanwezig.",
-      "production_patterns": [
-        "^DNO\\b"
+      "id": "regierepetitie-hoofdtoneel-twee-uur-vooraf",
+      "description": "Voor een regierepetitie op het Hoofdtoneel zijn AVM1 en AVM2 minimaal twee uur voor aanvang aanwezig.",
+      "location_patterns": [
+        "^Hoofdtoneel$"
       ],
       "activity_patterns": [
         "^regie\\s*repetitie(?:\\s+.*)?$"
       ],
-      "minutes_before": 60
+      "minutes_before": 120
     }
   ],
   "call_time_adjustments": [
@@ -401,6 +415,7 @@
   ],
   "shift_planning": {
     "target_minutes": 480,
+    "target_fill_earliest_start": "09:00",
     "default_shift_start": "09:00",
     "default_shift_end": "17:00",
     "round_shift_boundaries_minutes": 30,
@@ -426,10 +441,20 @@
     ],
     "activity_buffer_rules": [
       {
-        "id": "orkesttoneelrepetitie-twee-uur-vooraf",
-        "description": "Bij een orkesttoneelrepetitie is AVM minimaal twee gewerkte uren voor aanvang aanwezig; pauzes tellen niet mee.",
+        "id": "proefbouw-geen-opbouw-of-afbouw",
+        "description": "Bij een proefbouw is geen extra opbouw- of afbouwtijd nodig; de activiteit zelf bepaalt het vereiste aanwezigheidsvenster.",
         "activity_patterns": [
-          "^orkest\\s*toneelrepetitie(?:\\s+.*)?$"
+          "^proefbouw(?:\\s+.*)?$"
+        ],
+        "before_minutes": 0,
+        "after_minutes": 0
+      },
+      {
+        "id": "orkesttoneelrepetitie-en-zit-twee-uur-vooraf",
+        "description": "Bij een orkesttoneelrepetitie, Zit of Sitzprobe is AVM minimaal twee gewerkte uren voor aanvang aanwezig; pauzes tellen niet mee.",
+        "activity_patterns": [
+          "^orkest\\s*toneelrepetitie(?:\\s+.*)?$",
+          "^(?:zit|sitzprobe)(?:\\s+.*)?$"
         ],
         "before_minutes": 120
       },
@@ -472,37 +497,55 @@
     ],
     "special_shift_rules": [
       {
+        "id": "enkele-zondagvoorstelling-om-1400",
+        "description": "Bij één voorstelling op zondag met aanvang 14:00 loopt de AVM-dienst van 10:00 tot 18:00.",
+        "activity_patterns": [
+          "^voorstelling(?:\\s+\\d+)?$",
+          "^schoolvoorstelling$"
+        ],
+        "activity_start": "14:00",
+        "weekdays": [
+          6
+        ],
+        "maximum_matching_activities": 1,
+        "start": "10:00",
+        "end": "18:00",
+        "require_end_to_cover_activity_buffer": true,
+        "preserve_end": true,
+        "preserve_required_window": true
+      },
+      {
         "id": "schoolvoorstelling-om-1330",
-        "description": "Een schoolvoorstelling begint minimaal twee gewerkte uren voor aanvang; lunch- en dinerpauzes tellen niet mee.",
+        "description": "Een schoolvoorstelling begint minimaal twee gewerkte uren voor aanvang en eindigt één uur na het einde van de voorstelling; lunch- en dinerpauzes tellen niet mee.",
         "activity_patterns": [
           "^schoolvoorstelling$"
         ],
         "activity_start": "13:30",
         "use_avm_call_time": true,
-        "end": "18:00",
+        "end_after_activity_minutes": 60,
         "preserve_required_window": true
       },
       {
         "id": "voorstelling-om-1400",
-        "description": "Een voorstelling met aanvang 14:00 begint minimaal twee gewerkte uren vooraf, exclusief pauzes, en eindigt om 18:00.",
+        "description": "Een voorstelling met aanvang 14:00 begint minimaal twee gewerkte uren vooraf, exclusief pauzes, en eindigt één uur na het einde van de voorstelling.",
         "activity_patterns": [
           "^voorstelling(?:\\s+\\d+)?$",
           "^schoolvoorstelling$"
         ],
         "activity_start": "14:00",
         "use_avm_call_time": true,
-        "end": "18:00",
+        "end_after_activity_minutes": 60,
         "preserve_required_window": true
       },
       {
         "id": "voorstelling-relatief-aan-aanvang",
-        "description": "Een voorstelling begint minimaal twee gewerkte uren voor aanvang, exclusief pauzes, en eindigt vier uur na aanvang.",
+        "description": "Een voorstelling begint minimaal twee gewerkte uren voor aanvang, exclusief pauzes, en eindigt één uur na het einde van de voorstelling.",
         "activity_patterns": [
           "^voorstelling(?:\\s+\\d+)?$",
           "^schoolvoorstelling$"
         ],
         "use_avm_call_time": true,
-        "end_offset_minutes": 240,
+        "end_after_activity_minutes": 60,
         "preserve_required_window": true
       },
       {
@@ -622,9 +665,10 @@
         "priority": 9
       },
       {
-        "description": "Orkesttoneelrepetities hebben hoge prioriteit en blijven boven BEL/CD bij AVM1/AVM2.",
+        "description": "Orkesttoneelrepetities en zit-/sitzprobes hebben hoge prioriteit en blijven boven BEL/CD bij AVM1/AVM2.",
         "activity_patterns": [
-          "^orkest\\s*toneelrepetitie(?:\\s+.*)?$"
+          "^orkest\\s*toneelrepetitie(?:\\s+.*)?$",
+          "^(?:zit|sitzprobe)(?:\\s+.*)?$"
         ],
         "priority": 10
       },

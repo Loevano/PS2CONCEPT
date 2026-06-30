@@ -26,6 +26,7 @@ class DailyShift:
     items: list[PlanningItem]
     target_minutes: int = 480
     target_fill_minutes: int = 0
+    target_fill_after_minutes: int = 0
     flags: list[str] = field(default_factory=list)
 
     @property
@@ -112,19 +113,45 @@ def _required_window(
                 for pattern in patterns
             ):
                 continue
+            weekdays = [int(value) for value in rule.get("weekdays", [])]
+            if weekdays and item.day.weekday() not in weekdays:
+                continue
+            maximum_matching = rule.get("maximum_matching_activities")
+            if maximum_matching is not None:
+                matching_count = sum(
+                    1
+                    for candidate in items
+                    if _matches_patterns(candidate.activity, patterns)
+                )
+                if matching_count > int(maximum_matching):
+                    continue
             if rule.get("activity_start") and item.start.strftime("%H:%M") != str(
                 rule["activity_start"]
             ):
                 continue
+            if rule.get("require_end_to_cover_activity_buffer") and "end" in rule:
+                _, required_after, preserve_after = _activity_buffer_minutes(
+                    item, shift_rules
+                )
+                if item.avm_day_wrap_minutes is not None and not preserve_after:
+                    required_after = item.avm_day_wrap_minutes
+                fixed_end = _at(item.day, str(rule["end"]))
+                if fixed_end < item_end + timedelta(minutes=required_after):
+                    continue
             if rule.get("use_avm_call_time") and item.avm_call_time is not None:
+                if "end" in rule:
+                    planned_end = _at(item.day, str(rule["end"]))
+                elif "end_after_activity_minutes" in rule:
+                    planned_end = item_end + timedelta(
+                        minutes=int(rule["end_after_activity_minutes"])
+                    )
+                else:
+                    planned_end = item.start + timedelta(
+                        minutes=int(rule["end_offset_minutes"])
+                    )
                 candidate = (
                     item.avm_call_time,
-                    (
-                        _at(item.day, str(rule["end"]))
-                        if "end" in rule
-                        else item.start
-                        + timedelta(minutes=int(rule["end_offset_minutes"]))
-                    ),
+                    planned_end,
                 )
             elif "start_offset_minutes" in rule and "end_offset_minutes" in rule:
                 candidate = (
@@ -136,7 +163,11 @@ def _required_window(
                     _at(item.day, str(rule["start"])),
                     _at(item.day, str(rule["end"])),
                 )
-            if item.avm_day_wrap_minutes is not None and item.end is not None:
+            if (
+                item.avm_day_wrap_minutes is not None
+                and item.end is not None
+                and not rule.get("preserve_end")
+            ):
                 candidate = (
                     candidate[0],
                     item.end + timedelta(minutes=item.avm_day_wrap_minutes),
@@ -315,9 +346,13 @@ def build_assignments(
             item.avm_assignment_status = "ingepland"
 
     for item in sorted(flexible, key=lambda value: (value.day, value.start)):
-        positions = [
-            position for position in item.avm_flexible_positions if position in assignments
-        ]
+        positions = sorted(
+            {
+                position
+                for position in item.avm_flexible_positions
+                if position in assignments
+            }
+        )
         if not positions:
             continue
         item_minutes = (
@@ -629,26 +664,54 @@ def _plan_daily_shifts_for_items(
         shifts.append(shift)
 
     def fill_to_target(
-        shift: DailyShift, earliest_start: datetime | None = None
+        shift: DailyShift,
+        earliest_start: datetime | None = None,
+        latest_end: datetime | None = None,
     ) -> None:
         if shift.duration_minutes >= shift.target_minutes:
             return
+
+        # Vul een korte dienst bij voorkeur aan de voorkant aan.
         desired_start = shift.end - timedelta(minutes=shift.target_minutes)
-        new_start = (
-            max(desired_start, earliest_start)
-            if earliest_start is not None
-            else desired_start
-        )
+        start_limits = [desired_start]
+        target_fill_floor = shift_rules.get("target_fill_earliest_start")
+        if target_fill_floor:
+            start_limits.append(_at(shift.day, str(target_fill_floor)))
+        if earliest_start is not None:
+            start_limits.append(earliest_start)
+        new_start = max(start_limits)
         added = int((shift.start - new_start).total_seconds() // 60)
-        if added <= 0:
+        if added > 0:
+            shift.start = new_start
+            shift.target_fill_minutes += added
+
+        # Als eerder beginnen door nachtrust niet kan, vul dan aan de achterkant.
+        if shift.duration_minutes >= shift.target_minutes:
             return
-        shift.start = new_start
-        shift.target_fill_minutes += added
+        desired_end = shift.start + timedelta(
+            minutes=min(shift.target_minutes, maximum_minutes)
+        )
+        new_end = (
+            min(desired_end, latest_end)
+            if latest_end is not None
+            else desired_end
+        )
+        added_after = int((new_end - shift.end).total_seconds() // 60)
+        if added_after <= 0:
+            return
+        shift.end = new_end
+        shift.target_fill_minutes += added_after
+        shift.target_fill_after_minutes += added_after
+
+    def latest_end_for(index: int) -> datetime | None:
+        if index + 1 >= len(shifts):
+            return None
+        return shifts[index + 1].start - timedelta(minutes=minimum_rest_minutes)
 
     if shifts:
-        fill_to_target(shifts[0])
+        fill_to_target(shifts[0], latest_end=latest_end_for(0))
 
-    for previous, current in zip(shifts, shifts[1:]):
+    for index, (previous, current) in enumerate(zip(shifts, shifts[1:]), start=1):
         rest_minutes = int((current.start - previous.end).total_seconds() // 60)
         if rest_minutes < minimum_rest_minutes:
             compliant_start = previous.end + timedelta(minutes=minimum_rest_minutes)
@@ -670,6 +733,7 @@ def _plan_daily_shifts_for_items(
         fill_to_target(
             current,
             earliest_start=previous.end + timedelta(minutes=minimum_rest_minutes),
+            latest_end=latest_end_for(index),
         )
 
     for shift in shifts:
@@ -677,16 +741,38 @@ def _plan_daily_shifts_for_items(
             target_label = (
                 f"{shift.target_minutes // 60}u{shift.target_minutes % 60:02d}"
             )
+            before_minutes = (
+                shift.target_fill_minutes - shift.target_fill_after_minutes
+            )
             if shift.duration_minutes >= shift.target_minutes:
-                shift.flags.append(
-                    f"Dienst begint {shift.target_fill_minutes} min eerder "
-                    f"om streefduur van {target_label} te halen"
-                )
+                if before_minutes and shift.target_fill_after_minutes:
+                    shift.flags.append(
+                        f"Dienst begint {before_minutes} min eerder en eindigt "
+                        f"{shift.target_fill_after_minutes} min later om streefduur "
+                        f"van {target_label} te halen"
+                    )
+                elif shift.target_fill_after_minutes:
+                    shift.flags.append(
+                        f"Dienst eindigt {shift.target_fill_after_minutes} min later "
+                        f"om streefduur van {target_label} te halen"
+                    )
+                else:
+                    shift.flags.append(
+                        f"Dienst begint {before_minutes} min eerder "
+                        f"om streefduur van {target_label} te halen"
+                    )
             else:
                 shift.flags.append(
-                    f"Dienst begint {shift.target_fill_minutes} min eerder; "
+                    f"Dienst is waar mogelijk aangevuld; "
                     f"streefduur van {target_label} niet haalbaar door minimale nachtrust"
                 )
+        elif shift.duration_minutes < shift.target_minutes:
+            target_label = (
+                f"{shift.target_minutes // 60}u{shift.target_minutes % 60:02d}"
+            )
+            shift.flags.append(
+                f"Streefduur van {target_label} niet haalbaar door minimale nachtrust"
+            )
         if shift.duration_minutes > maximum_minutes:
             shift.flags.append(
                 f"CAO-CONFLICT: dienst duurt {shift.duration_minutes // 60}u"

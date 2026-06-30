@@ -329,6 +329,7 @@ class ParserTests(unittest.TestCase):
                         "zondag 20 december 2026",
                         "Hoofdtoneel",
                         "14.00 - 16.50 Voorstelling 8",
+                        "17.00 - 19.00 Afbouw",
                     ]
                 )
             ]
@@ -442,8 +443,8 @@ class ParserTests(unittest.TestCase):
         apply_avm_rules(schedule, rules)
 
         shift = plan_daily_shifts(schedule, "AVM1", rules)[0]
-        self.assertEqual(shift.start.strftime("%H:%M"), "08:30")
-        self.assertEqual(shift.end.strftime("%H:%M"), "16:30")
+        self.assertEqual(shift.start.strftime("%H:%M"), "09:00")
+        self.assertEqual(shift.end.strftime("%H:%M"), "17:00")
         self.assertEqual(shift.duration_minutes, 480)
 
     def test_performance_shifts_use_two_work_hours_before_excluding_breaks(self):
@@ -472,7 +473,69 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(shifts[1].start.strftime("%H:%M"), "16:00")
         self.assertEqual(shifts[1].end.strftime("%H:%M"), "00:00")
 
-    def test_target_fill_starts_earlier_without_reducing_night_rest(self):
+    def test_single_sunday_performance_at_1400_uses_ten_to_six_shift(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "zondag 20 december 2026",
+                        "Hoofdtoneel",
+                        "14.00 - 16.50 Voorstelling 8",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        for position in ("AVM1", "AVM2"):
+            shift = plan_daily_shifts(schedule, position, rules)[0]
+            self.assertEqual(shift.start.strftime("%H:%M"), "10:00")
+            self.assertEqual(shift.end.strftime("%H:%M"), "18:00")
+
+    def test_sunday_1400_rule_does_not_apply_to_double_performance_day(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "zondag 20 december 2026",
+                        "Hoofdtoneel",
+                        "14.00 - 16.50 Voorstelling 8",
+                        "20.00 - 22.50 Voorstelling 9",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        for position in ("AVM1", "AVM2"):
+            shift = plan_daily_shifts(schedule, position, rules)[0]
+            self.assertEqual(shift.end.strftime("%H:%M"), "00:00")
+            self.assertGreater(shift.duration_minutes, 480)
+
+    def test_sunday_1400_rule_does_not_cut_required_load_out_time(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "zondag 20 december 2026",
+                        "Hoofdtoneel",
+                        "14.00 - 17.30 Voorstelling 8",
+                        "18.00 - 19.00 Afbouw",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        for position in ("AVM1", "AVM2"):
+            shift = plan_daily_shifts(schedule, position, rules)[0]
+            self.assertEqual(shift.end.strftime("%H:%M"), "18:30")
+            self.assertNotEqual(shift.start.strftime("%H:%M"), "10:00")
+
+    def test_target_fill_ends_later_when_start_is_limited_by_night_rest(self):
         schedule = parse_page_texts(
             [
                 "\n".join(
@@ -495,13 +558,47 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(shifts[0].start.strftime("%H:%M"), "15:30")
         self.assertEqual(shifts[0].end.strftime("%H:%M"), "23:30")
         self.assertEqual(shifts[1].start.strftime("%H:%M"), "10:30")
-        self.assertEqual(shifts[1].end.strftime("%H:%M"), "18:00")
-        self.assertEqual(shifts[1].duration_minutes, 450)
+        self.assertEqual(shifts[1].end.strftime("%H:%M"), "18:30")
+        self.assertEqual(shifts[1].duration_minutes, 480)
         self.assertFalse(any("CAO-CONFLICT" in flag for flag in shifts[1].flags))
         self.assertTrue(
             any(
-                "streefduur van 8u00 niet haalbaar door minimale nachtrust" in flag
+                "eindigt 30 min later om streefduur van 8u00 te halen" in flag
                 for flag in shifts[1].flags
+            )
+        )
+
+    def test_target_fill_does_not_reduce_rest_before_next_shift(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "vrijdag 26 februari 2027",
+                        "Hoofdtoneel",
+                        "18.00 - 21.00 Regierepetitie 1",
+                        "zaterdag 27 februari 2027",
+                        "Hoofdtoneel",
+                        "10.00 - 13.00 Regierepetitie 2",
+                        "zondag 28 februari 2027",
+                        "Hoofdtoneel",
+                        "04.00 - 07.00 Regierepetitie 3",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        shifts = plan_daily_shifts(schedule, "AVM1", rules)
+        middle = shifts[1]
+        self.assertEqual(middle.start.strftime("%H:%M"), "09:00")
+        self.assertEqual(middle.end.strftime("%H:%M"), "16:00")
+        self.assertEqual(middle.duration_minutes, 420)
+        self.assertTrue(
+            any(
+                "streefduur van 8u00 niet haalbaar door minimale nachtrust"
+                in flag.casefold()
+                for flag in middle.flags
             )
         )
 
@@ -536,6 +633,75 @@ class ParserTests(unittest.TestCase):
             self.assertEqual(shift.end.strftime("%H:%M"), "00:00")
             self.assertEqual(shift.duration_minutes, 750)
             self.assertFalse(any("CAO-CONFLICT" in flag for flag in shift.flags))
+
+    def test_performance_shift_end_is_based_on_last_show_end(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "maandag 12 oktober 2026",
+                        "Hoofdtoneel",
+                        "12.30 - 13.30 Voorstelling 2",
+                        "16.00 - 17.00 Voorstelling 3",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        for position in ("AVM1", "AVM2"):
+            shift = plan_daily_shifts(schedule, position, rules)[0]
+            self.assertEqual(shift.start.strftime("%H:%M"), "10:00")
+            self.assertEqual(shift.end.strftime("%H:%M"), "18:00")
+            self.assertEqual(shift.duration_minutes, 480)
+
+    def test_target_fill_never_starts_before_nine_and_moves_remainder_to_end(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "woensdag 14 oktober 2026",
+                        "Hoofdtoneel",
+                        "12.30 - 13.30 Voorstelling 6",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        for position in ("AVM1", "AVM2"):
+            shift = plan_daily_shifts(schedule, position, rules)[0]
+            self.assertEqual(shift.start.strftime("%H:%M"), "09:00")
+            self.assertEqual(shift.end.strftime("%H:%M"), "17:00")
+            self.assertEqual(shift.duration_minutes, 480)
+            self.assertTrue(
+                any(
+                    "begint 90 min eerder en eindigt 150 min later" in flag
+                    for flag in shift.flags
+                )
+            )
+
+    def test_required_call_time_before_nine_is_not_moved_to_nine(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "maandag 7 december 2026",
+                        "Hoofdtoneel",
+                        "10.00 - 11.00 Schoolvoorstelling",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        for position in ("AVM1", "AVM2"):
+            shift = plan_daily_shifts(schedule, position, rules)[0]
+            self.assertEqual(shift.start.strftime("%H:%M"), "08:00")
+            self.assertEqual(shift.end.strftime("%H:%M"), "16:00")
 
     def test_technical_and_cd_rehearsals_prefer_avm1(self):
         schedule = parse_page_texts(
@@ -628,7 +794,7 @@ class ParserTests(unittest.TestCase):
         self.assertNotIn("Cd toneelrepetitie", [item.activity for item in avm1_items])
         self.assertIn("Cd toneelrepetitie", [item.activity for item in avm2_items])
 
-    def test_belichten_requires_one_avm_and_defaults_to_avm2(self):
+    def test_belichten_has_no_implicit_preference_from_position_order(self):
         schedule = parse_page_texts(
             [
                 "\n".join(
@@ -666,8 +832,8 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(richten.avm_status, "niet_gemarkeerd")
         text = render_text(schedule)
         avm1_text, avm2_text = text.split("ROOSTER AVM2", maxsplit=1)
-        self.assertNotIn("BEL 10:00-12:15", avm1_text)
-        self.assertIn("BEL 10:00-12:15", avm2_text)
+        self.assertIn("BEL 10:00-12:15", avm1_text)
+        self.assertNotIn("BEL 10:00-12:15", avm2_text)
         self.assertIn("wo 02-12-2026 | 09:00-17:00 | 08u00", text)
         self.assertIn("BEL 10:00-12:15", text)
 
@@ -804,6 +970,42 @@ class ParserTests(unittest.TestCase):
         for position in ("AVM1", "AVM2"):
             shift = plan_daily_shifts(schedule, position, rules)[0]
             self.assertEqual(shift.start.strftime("%H:%M"), "11:30")
+
+    def test_zit_and_sitzprobe_use_otr_staffing_call_time_code_and_priority(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "HNB 4 - Testproductie",
+                        "maandag 24 mei 2027",
+                        "Hoofdtoneel",
+                        "12.30 Lunchpauze",
+                        "14.00 - 17.00 Zit",
+                        "dinsdag 25 mei 2027",
+                        "Hoofdtoneel",
+                        "14.00 - 17.00 Sitzprobe",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        zit, sitzprobe = [item for item in schedule.items if item.kind != "pauze"]
+        self.assertEqual(zit.avm_required_count, 2)
+        self.assertEqual(sitzprobe.avm_required_count, 2)
+        self.assertEqual(zit.avm_call_time.strftime("%H:%M"), "11:30")
+        self.assertEqual(sitzprobe.avm_call_time.strftime("%H:%M"), "11:30")
+        self.assertIn("ZIT", render_daily_summary_text(schedule))
+        self.assertRegex(render_avm_events_text(schedule), r"Zit\s+\| ZIT")
+        self.assertRegex(render_avm_events_text(schedule), r"Sitzprobe\s+\| ZIT")
+
+        priority_rule = next(
+            rule
+            for rule in rules["overflow_policy"]["replacement_priority_rules"]
+            if any("sitzprobe" in pattern for pattern in rule["activity_patterns"])
+        )
+        self.assertEqual(priority_rule["priority"], 10)
 
     def test_otr_vgo_and_pvg_use_two_work_hours_before_excluding_breaks(self):
         schedule = parse_page_texts(
@@ -1146,6 +1348,26 @@ class ParserTests(unittest.TestCase):
             render_avm_events_text(schedule),
             r"Proefbouw\s+\| PB",
         )
+
+    def test_proefbouw_has_no_setup_or_teardown_buffer(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "donderdag 3 december 2026",
+                        "Hoofdtoneel",
+                        "18.00 - 21.00 Proefbouw",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        shift = plan_daily_shifts(schedule, "AVM1", rules)[0]
+
+        self.assertEqual(shift.start.strftime("%H:%M"), "13:00")
+        self.assertEqual(shift.end.strftime("%H:%M"), "21:00")
 
     def test_cast_and_house_presentation_code_is_rendered(self):
         schedule = parse_page_texts(
@@ -2112,13 +2334,64 @@ class ParserTests(unittest.TestCase):
         )
         self.assertEqual(items["Regierepetitie"].avm_required_count, 2)
         self.assertEqual(
-            items["Regierepetitie"].avm_call_time.strftime("%H:%M"), "18:00"
+            items["Regierepetitie"].avm_call_time.strftime("%H:%M"), "17:00"
         )
         self.assertEqual(
             items["Oplevering van het decor"].avm_planning_level, "richtlijn"
         )
         self.assertEqual(items["Oplevering van het decor"].avm_status, "richtlijn")
         self.assertEqual(items["Piano CD"].avm_required_count, 2)
+
+    def test_rr_requires_avm1_and_avm2_two_hours_early_only_on_main_stage(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "HNB 4 - Testproductie",
+                        "donderdag 5 november 2026",
+                        "Hoofdtoneel",
+                        "19.00 - 22.00 Regierepetitie",
+                        "vrijdag 6 november 2026",
+                        "Studio 1",
+                        "19.00 - 22.00 Regierepetitie",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        main_stage, studio = schedule.items
+        self.assertEqual(main_stage.avm_required_count, 2)
+        self.assertEqual(main_stage.avm_call_time.strftime("%H:%M"), "17:00")
+        self.assertEqual(studio.avm_required_count, 0)
+
+        assignments = build_cao_resolved_assignments(schedule, rules)
+        self.assertIn(main_stage, assignments["AVM1"])
+        self.assertIn(main_stage, assignments["AVM2"])
+
+    def test_or_requires_two_avms_only_on_main_stage(self):
+        schedule = parse_page_texts(
+            [
+                "\n".join(
+                    [
+                        "DNO 4 - Testopera",
+                        "donderdag 5 november 2026",
+                        "Hoofdtoneel",
+                        "10.00 - 13.00 Orkestrepetitie",
+                        "vrijdag 6 november 2026",
+                        "Repetitiezaal",
+                        "10.00 - 13.00 Orkestrepetitie",
+                    ]
+                )
+            ]
+        )
+        rules = load_rules(PROJECT_ROOT / "config" / "avm_rules.json")
+        apply_avm_rules(schedule, rules)
+
+        main_stage, rehearsal_room = schedule.items
+        self.assertEqual(main_stage.avm_required_count, 2)
+        self.assertEqual(rehearsal_room.avm_required_count, 0)
 
     def test_dno_without_decor_answer_stays_blocked_on_question(self):
         schedule = parse_page_texts(
